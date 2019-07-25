@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -20,7 +21,7 @@ func ReadConfig() (config Config) {
 		"The external git GUI application to use for reviews.")
 	flag.Parse()
 
-	config.GitRoots = strings.Split(*gitRoots, ":")
+	config.GitRoots = strings.Split(os.Getenv(*gitRoots), ":")
 	return config
 }
 
