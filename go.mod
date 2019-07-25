@@ -1,3 +1,3 @@
-module gitpull
+module gitreview
 
 go 1.12
