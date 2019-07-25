@@ -119,8 +119,9 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 	log.Println("--------------------------------------------")
 	log.Println("Copy the following into the code review log:")
 	log.Println("--------------------------------------------")
-	log.Println()
 
+	fmt.Println()
+	fmt.Println()
 	fmt.Printf("## %s\n\n", time.Now().Format("2006-01-02"))
 	for _, fetch := range this.reviews {
 		if !strings.Contains(strings.ToLower(fetch), "smartystreets") {
