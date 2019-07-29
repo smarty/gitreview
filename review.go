@@ -186,6 +186,6 @@ func prompt(message string) {
 
 const (
 	gitStatusCommand       = "git status --porcelain -uall"
-	gitFetchCommand        = "git fetch"
+	gitFetchCommand        = "git fetch" // --dry-run"
 	pendingReviewIndicator = ".." // ie. [7761a97..1bbecb6  master     -> origin/master]
 )
