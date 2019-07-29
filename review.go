@@ -116,20 +116,10 @@ func (this *GitReviewer) ReviewAllNotableRepositories() {
 	printMap(this.reviews, "The following %d repositories have been updated:")
 
 	keys := sortUniqueKeys(this.problems, this.messes, this.reviews)
-	log.Printf("Now beginning review of %d total repositories...", len(keys))
+	log.Printf("A total of %d repositories need to be reviewed.", len(keys))
+	prompt(fmt.Sprintf("Press <ENTER> to initiate review (will open %d review windows)...", len(keys)))
 
-	for i, path := range keys {
-		if containsKey(this.problems, path) {
-			log.Println(path, this.problems[path])
-		}
-		if containsKey(this.messes, path) {
-			log.Printf("%s\n%s", path, this.messes[path])
-		}
-		if containsKey(this.reviews, path) {
-			log.Printf("\n%s", this.reviews[path])
-		}
-		log.Printf("Press <ENTER> to review repo %d / %d...", i, len(keys))
-		bufio.NewScanner(os.Stdin).Scan()
+	for _, path := range keys {
 		err := exec.Command(this.gitGUI, path).Run()
 		if err != nil {
 			log.Println("Failed to open git GUI:", err)
@@ -142,9 +132,7 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 		return
 	}
 
-	log.Println("----------------------")
-	log.Println("Code review log entry:")
-	log.Println("----------------------")
+	prompt("Press <ENTER> to conclude review process and print code review log entry...")
 
 	fmt.Println()
 	fmt.Println()
@@ -194,6 +182,11 @@ func execute(dir, command string) (string, error) {
 	cmd.Dir = dir
 	out, err := cmd.CombinedOutput()
 	return string(out), err
+}
+
+func prompt(message string) {
+	log.Println(message)
+	bufio.NewScanner(os.Stdin).Scan()
 }
 
 const (
