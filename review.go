@@ -159,11 +159,6 @@ func sortUniqueKeys(maps ...map[string]string) (unique []string) {
 	return unique
 }
 
-func containsKey(m map[string]string, key string) bool {
-	_, found := m[key]
-	return found
-}
-
 func printMap(m map[string]string, preamble string) {
 	if len(m) == 0 {
 		return
