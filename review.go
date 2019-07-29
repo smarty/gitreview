@@ -97,10 +97,10 @@ func (this *GitReviewer) ReviewAllNotableRepositories() {
 			log.Println(path, this.problems[path])
 		}
 		if containsKey(this.messes, path) {
-			log.Println(path, this.messes[path])
+			log.Printf("%s\n%s", path, this.messes[path])
 		}
 		if containsKey(this.reviews, path) {
-			log.Println(this.reviews[path])
+			log.Printf("\n%s", this.reviews[path])
 		}
 		log.Printf("Press <ENTER> to open git GUI...")
 		bufio.NewScanner(os.Stdin).Scan()
