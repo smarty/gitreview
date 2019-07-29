@@ -62,31 +62,24 @@ func collectGitRepositoryPaths(gitRoots []string) (paths []string) {
 	return paths
 }
 
-func (this *GitReviewer) GitStatusAll() {
-	log.Printf("Running `git status` for all %d repos...", len(this.repoPaths))
-	for _, path := range this.repoPaths {
-		this.gitStatus(path)
-	}
-}
-func (this *GitReviewer) gitStatus(path string) {
-	out, err := execute(path, gitStatusCommand)
-	if err != nil {
-		this.problems[path] = fmt.Sprintln("[ERROR] Could not ascertain repo status:", err)
-		return
-	}
-	if len(strings.TrimSpace(string(out))) > 0 {
-		this.messes[path] = string(out)
-	}
-}
-
 func (this *GitReviewer) GitFetchAll() {
-	log.Printf("Running `git fetch` for all %d repos...", len(this.repoPaths))
-	for i, path := range this.repoPaths {
-		this.gitFetch(i, path)
+	log.Printf("Running `git status` and `get fetch` for %d repos...", len(this.repoPaths))
+	for _, fetch := range NewGitClient(16).ScanAll(this.repoPaths) {
+		if len(fetch.StatusError) > 0 {
+			this.problems[fetch.RepoPath] += fetch.StatusError
+		}
+		if len(fetch.StatusOutput) > 0 {
+			this.messes[fetch.RepoPath] = fetch.StatusOutput
+		}
+		if len(fetch.FetchError) > 0 {
+			this.problems[fetch.RepoPath] += fetch.FetchError
+		}
+		if len(fetch.FetchOutput) > 0 {
+			this.reviews[fetch.RepoPath] = fetch.FetchOutput
+		}
 	}
-	log.Println("All repositories fetched.")
 }
-func (this *GitReviewer) gitFetch(index int, path string) {
+func (this *GitReviewer) gitFetch(index int, path string) { // TODO: remove
 	log.Printf("Fetching %s: %s", this.formatFetchProgress(index), path)
 	out, err := execute(path, gitFetchCommand)
 	if err != nil {
@@ -109,11 +102,11 @@ func (this *GitReviewer) formatFetchProgress(index int) string {
 }
 
 func (this *GitReviewer) reviewIsPending() bool {
-	return len(this.problems) + len(this.messes) + len(this.reviews) > 0
+	return len(this.problems)+len(this.messes)+len(this.reviews) > 0
 }
 
-func (this *GitReviewer) ReviewAllNotableRepositories() {
-	if !this.reviewIsPending(){
+func (this *GitReviewer) ReviewAll() {
+	if !this.reviewIsPending() {
 		log.Println("Nothing to review today.")
 		return
 	}
