@@ -80,10 +80,12 @@ func (this *GitReviewer) fetchRepo(index int, path string) {
 	}
 
 	progress := strings.TrimSpace(fmt.Sprintf("%3d / %-3d", index+1, len(this.repoPaths)))
+	progress = "(" + progress + ")"
 	for len(progress) < len("(999 / 999)") {
 		progress = " " + progress
 	}
-	log.Printf("Fetching (%s): %s", progress, path)
+
+	log.Printf("Fetching %s: %s", progress, path)
 	out, err = execute(path, gitFetchCommand)
 	if err != nil {
 		this.problems[path] = fmt.Sprintln("[ERROR] Could not fetch:", err)
