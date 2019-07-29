@@ -142,9 +142,9 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 		return
 	}
 
-	log.Println("--------------------------------------------")
-	log.Println("Copy the following into the code review log:")
-	log.Println("--------------------------------------------")
+	log.Println("----------------------")
+	log.Println("Code review log entry:")
+	log.Println("----------------------")
 
 	fmt.Println()
 	fmt.Println()
