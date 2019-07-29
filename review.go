@@ -107,6 +107,10 @@ func (this *GitReviewer) ReviewAllNotableRepositories() {
 		return
 	}
 
+	log.Println("--------")
+	log.Println("Summary:")
+	log.Println("--------")
+
 	printMap(this.problems, "The following %d repositories experienced errors:")
 	printMap(this.messes, "The following %d repositories have uncommitted changes:")
 	printMap(this.reviews, "The following %d repositories have been updated:")
