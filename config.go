@@ -13,7 +13,7 @@ type Config struct {
 }
 
 func ReadConfig() (config Config) {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	log.SetFlags(log.Ltime | log.Lshortfile)
 
 	gitRoots := flag.String("roots", "CDPATH",
 		"The name of the environment variable containing colon-separated path values to scan.")
