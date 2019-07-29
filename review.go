@@ -41,7 +41,7 @@ func collectGitRepositoryPaths(gitRoots []string) (paths []string) {
 		}
 		listing, err := ioutil.ReadDir(root)
 		if err != nil {
-			log.Println("Couldn't resolve path:", err)
+			log.Println("Couldn't resolve path (skipping):", err)
 			continue
 		}
 		for _, item := range listing {
