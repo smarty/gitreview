@@ -7,6 +7,13 @@ import (
 	"sync"
 )
 
+
+const (
+	gitStatusCommand       = "git status --porcelain -uall"
+	gitFetchCommand        = "git fetch" // --dry-run"
+	pendingReviewIndicator = ".." // ie. [7761a97..1bbecb6  master     -> origin/master]
+)
+
 type GitClient struct {
 	workerCount int
 	workerInput chan string

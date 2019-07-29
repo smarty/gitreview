@@ -1,14 +1,12 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"sort"
 	"strings"
 	"time"
 )
@@ -79,18 +77,6 @@ func (this *GitReviewer) GitFetchAll() {
 		}
 	}
 }
-func (this *GitReviewer) gitFetch(index int, path string) { // TODO: remove
-	log.Printf("Fetching %s: %s", this.formatFetchProgress(index), path)
-	out, err := execute(path, gitFetchCommand)
-	if err != nil {
-		this.problems[path] = fmt.Sprintln("[ERROR] Could not fetch:", err)
-		return
-	}
-
-	if strings.Contains(string(out), pendingReviewIndicator) {
-		this.reviews[path] = string(out)
-	}
-}
 
 func (this *GitReviewer) formatFetchProgress(index int) string {
 	progress := strings.TrimSpace(fmt.Sprintf("%3d / %-3d", index+1, len(this.repoPaths)))
@@ -144,48 +130,3 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 		fmt.Println(fetch)
 	}
 }
-
-func sortUniqueKeys(maps ...map[string]string) (unique []string) {
-	combined := make(map[string]struct{})
-	for _, m := range maps {
-		for key := range m {
-			combined[key] = struct{}{}
-		}
-	}
-	for key := range combined {
-		unique = append(unique, key)
-	}
-	sort.Strings(unique)
-	return unique
-}
-
-func printMap(m map[string]string, preamble string) {
-	if len(m) == 0 {
-		return
-	}
-	log.Printf(preamble, len(m))
-	log.Println()
-	for path := range m {
-		log.Println(path)
-	}
-	log.Println()
-}
-
-func execute(dir, command string) (string, error) {
-	args := strings.Fields(command)
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Dir = dir
-	out, err := cmd.CombinedOutput()
-	return string(out), err
-}
-
-func prompt(message string) {
-	log.Println(message)
-	bufio.NewScanner(os.Stdin).Scan()
-}
-
-const (
-	gitStatusCommand       = "git status --porcelain -uall"
-	gitFetchCommand        = "git fetch" // --dry-run"
-	pendingReviewIndicator = ".." // ie. [7761a97..1bbecb6  master     -> origin/master]
-)
