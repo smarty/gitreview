@@ -62,31 +62,33 @@ func collectGitRepositoryPaths(gitRoots []string) (paths []string) {
 	return paths
 }
 
-func (this *GitReviewer) FetchAllRepositories() {
-	for i, path := range this.repoPaths {
-		this.fetchRepo(i, path)
+func (this *GitReviewer) GitStatusAll() {
+	log.Printf("Running `git status` for all %d repos...", len(this.repoPaths))
+	for _, path := range this.repoPaths {
+		this.gitStatus(path)
 	}
 }
-
-func (this *GitReviewer) fetchRepo(index int, path string) {
+func (this *GitReviewer) gitStatus(path string) {
 	out, err := execute(path, gitStatusCommand)
 	if err != nil {
 		this.problems[path] = fmt.Sprintln("[ERROR] Could not ascertain repo status:", err)
 		return
 	}
-
 	if len(strings.TrimSpace(string(out))) > 0 {
 		this.messes[path] = string(out)
 	}
+}
 
-	progress := strings.TrimSpace(fmt.Sprintf("%3d / %-3d", index+1, len(this.repoPaths)))
-	progress = "(" + progress + ")"
-	for len(progress) < len("(999 / 999)") {
-		progress = " " + progress
+func (this *GitReviewer) GitFetchAll() {
+	log.Printf("Running `git fetch` for all %d repos...", len(this.repoPaths))
+	for i, path := range this.repoPaths {
+		this.gitFetch(i, path)
 	}
-
-	log.Printf("Fetching %s: %s", progress, path)
-	out, err = execute(path, gitFetchCommand)
+	log.Println("All repositories fetched.")
+}
+func (this *GitReviewer) gitFetch(index int, path string) {
+	log.Printf("Fetching %s: %s", this.formatFetchProgress(index), path)
+	out, err := execute(path, gitFetchCommand)
 	if err != nil {
 		this.problems[path] = fmt.Sprintln("[ERROR] Could not fetch:", err)
 		return
@@ -97,12 +99,21 @@ func (this *GitReviewer) fetchRepo(index int, path string) {
 	}
 }
 
-func (this *GitReviewer) notableRepositoryCount() int {
-	return len(this.problems) + len(this.messes) + len(this.reviews)
+func (this *GitReviewer) formatFetchProgress(index int) string {
+	progress := strings.TrimSpace(fmt.Sprintf("%3d / %-3d", index+1, len(this.repoPaths)))
+	progress = "(" + progress + ")"
+	for len(progress) < len("(999 / 999)") {
+		progress = " " + progress
+	}
+	return progress
+}
+
+func (this *GitReviewer) reviewIsPending() bool {
+	return len(this.problems) + len(this.messes) + len(this.reviews) > 0
 }
 
 func (this *GitReviewer) ReviewAllNotableRepositories() {
-	if this.notableRepositoryCount() == 0 {
+	if !this.reviewIsPending(){
 		log.Println("Nothing to review today.")
 		return
 	}
@@ -124,7 +135,7 @@ func (this *GitReviewer) ReviewAllNotableRepositories() {
 }
 
 func (this *GitReviewer) PrintCodeReviewLogEntry() {
-	if this.notableRepositoryCount() == 0 {
+	if !this.reviewIsPending() {
 		return
 	}
 

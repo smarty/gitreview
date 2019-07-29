@@ -9,7 +9,8 @@ package main
 func main() {
 	config := ReadConfig()
 	reviewer := NewGitReviewer(config.GitRoots, config.GitGUI)
-	reviewer.FetchAllRepositories()
+	reviewer.GitStatusAll()
+	reviewer.GitFetchAll()
 	reviewer.ReviewAllNotableRepositories()
 	reviewer.PrintCodeReviewLogEntry()
 }
