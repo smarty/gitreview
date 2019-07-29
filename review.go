@@ -14,33 +14,37 @@ import (
 )
 
 type GitReviewer struct {
-	gitRoots []string
-	gitGUI   string
-	problems map[string]string
-	messes   map[string]string
-	reviews  map[string]string
+	gitGUI    string
+	repoPaths []string
+	problems  map[string]string
+	messes    map[string]string
+	reviews   map[string]string
 }
 
 func NewGitReviewer(gitRoots []string, gitGUI string) *GitReviewer {
 	return &GitReviewer{
-		gitRoots: gitRoots,
-		gitGUI:   gitGUI,
-		problems: make(map[string]string),
-		messes:   make(map[string]string),
-		reviews:  make(map[string]string),
+		repoPaths: collectGitRepositoryPaths(gitRoots),
+		gitGUI:    gitGUI,
+		problems:  make(map[string]string),
+		messes:    make(map[string]string),
+		reviews:   make(map[string]string),
 	}
 }
 
-func (this *GitReviewer) FetchAllRepositories() {
-	for _, root := range this.gitRoots {
+func collectGitRepositoryPaths(gitRoots []string) (paths []string) {
+	for _, root := range gitRoots {
 		if root == "." {
+			continue
+		}
+		if strings.TrimSpace(root) == "" {
 			continue
 		}
 		listing, err := ioutil.ReadDir(root)
 		if err != nil {
-			log.Panicln(err)
+			log.Println("Counldn't resolve path:", err)
+			continue
 		}
-		for i, item := range listing {
+		for _, item := range listing {
 			path := filepath.Join(root, item.Name())
 			if !item.IsDir() {
 				continue
@@ -51,27 +55,43 @@ func (this *GitReviewer) FetchAllRepositories() {
 				continue
 			}
 
-			out, err := execute(path, gitStatusCommand)
-			if err != nil {
-				this.problems[path] = fmt.Sprintln("[ERROR] Could not ascertain repo status:", err)
-				continue
-			}
-
-			if len(strings.TrimSpace(string(out))) > 0 {
-				this.messes[path] = string(out)
-			}
-
-			log.Printf("Fetching %d/%d: %s", i+1, len(listing), path)
-			out, err = execute(path, gitFetchCommand)
-			if err != nil {
-				this.problems[path] = fmt.Sprintln("[ERROR] Could not fetch:", err)
-				continue
-			}
-
-			if strings.Contains(string(out), pendingReviewIndicator) {
-				this.reviews[path] = string(out)
-			}
+			paths = append(paths, path)
 		}
+	}
+
+	return paths
+}
+
+func (this *GitReviewer) FetchAllRepositories() {
+	for i, path := range this.repoPaths {
+		this.fetchRepo(i, path)
+	}
+}
+
+func (this *GitReviewer) fetchRepo(index int, path string) {
+	out, err := execute(path, gitStatusCommand)
+	if err != nil {
+		this.problems[path] = fmt.Sprintln("[ERROR] Could not ascertain repo status:", err)
+		return
+	}
+
+	if len(strings.TrimSpace(string(out))) > 0 {
+		this.messes[path] = string(out)
+	}
+
+	progress := strings.TrimSpace(fmt.Sprintf("%3d / %-3d", index+1, len(this.repoPaths)))
+	for len(progress) < len("(999 / 999)") {
+		progress = " " + progress
+	}
+	log.Printf("Fetching (%s): %s", progress, path)
+	out, err = execute(path, gitFetchCommand)
+	if err != nil {
+		this.problems[path] = fmt.Sprintln("[ERROR] Could not fetch:", err)
+		return
+	}
+
+	if strings.Contains(string(out), pendingReviewIndicator) {
+		this.reviews[path] = string(out)
 	}
 }
 
