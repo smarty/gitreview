@@ -114,7 +114,7 @@ func (this *GitReviewer) ReviewAllNotableRepositories() {
 	keys := sortUniqueKeys(this.problems, this.messes, this.reviews)
 	log.Printf("Now beginning review of %d total repositories...", len(keys))
 
-	for _, path := range keys {
+	for i, path := range keys {
 		if containsKey(this.problems, path) {
 			log.Println(path, this.problems[path])
 		}
@@ -124,7 +124,7 @@ func (this *GitReviewer) ReviewAllNotableRepositories() {
 		if containsKey(this.reviews, path) {
 			log.Printf("\n%s", this.reviews[path])
 		}
-		log.Printf("Press <ENTER> to open git GUI...")
+		log.Printf("Press <ENTER> to review repo %d / %d...", i, len(keys))
 		bufio.NewScanner(os.Stdin).Scan()
 		err := exec.Command(this.gitGUI, path).Run()
 		if err != nil {
