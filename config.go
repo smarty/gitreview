@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"strings"
@@ -17,11 +16,10 @@ type Config struct {
 func ReadConfig() (config Config) {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 
-	flag.CommandLine.SetOutput(io.MultiWriter(os.Stdout, os.Stderr))
 	flag.Usage = func() {
-		fmt.Println(doc)
-		fmt.Println()
-		fmt.Println("Usage:")
+		fmt.Fprintln(os.Stderr, doc)
+		fmt.Fprintln(os.Stderr)
+		fmt.Fprintln(os.Stderr, "Usage:")
 		flag.PrintDefaults()
 	}
 	gitRoots := flag.String("roots", "CDPATH",

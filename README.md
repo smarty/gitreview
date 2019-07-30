@@ -12,7 +12,7 @@ output for repositories that were behind their origin.
 
 Installation:
 
-`go get github.com/mdwhatcott/gitreview`
+`go get -u github.com/mdwhatcott/gitreview`
 
 Usage:
   -gui string
