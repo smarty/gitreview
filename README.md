@@ -10,6 +10,7 @@ repositories that meet any of the following criteria:
 We use variants of the followiong commands to ascertain the
 status of a repository:
 
+- `git remote`    (shows remote address)
 - `git status`    (shows uncommitted files)
 - `git fetch`     (finds new commits/tags/branches)
 - `git rev-list`  (lists commits behind/ahead of master)
