@@ -14,8 +14,11 @@ Installation:
 
 `go get -u github.com/mdwhatcott/gitreview`
 
-Usage:
+CLI Flags:
+
+```
   -gui string
     	The external git GUI application to use for reviews. (default "smerge")
   -roots string
     	The name of the environment variable containing colon-separated path values to scan. (default "CDPATH")
+```

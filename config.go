@@ -19,8 +19,11 @@ func ReadConfig() (config Config) {
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, doc)
 		fmt.Fprintln(os.Stderr)
-		fmt.Fprintln(os.Stderr, "Usage:")
+		fmt.Fprintln(os.Stderr, "CLI Flags:")
+		fmt.Fprintln(os.Stderr)
+		fmt.Fprintln(os.Stderr, "```")
 		flag.PrintDefaults()
+		fmt.Fprintln(os.Stderr, "```")
 	}
 	gitRoots := flag.String("roots", "CDPATH",
 		"The name of the environment variable containing colon-separated path values to scan.")
@@ -33,6 +36,8 @@ func ReadConfig() (config Config) {
 }
 
 var doc = strings.Join([]string{
+	"# gitreview",
+	"",
 	"gitreview scans path entries found in the an environment",
 	"variable looking for git repositories that have uncommitted",
 	"changes or are behind their remote and opens a git GUI for",
