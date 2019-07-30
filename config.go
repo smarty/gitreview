@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -15,8 +16,10 @@ type Config struct {
 	OutputFilePath     string
 }
 
-func ReadConfig() (config Config) {
+func ReadConfig() *Config {
 	log.SetFlags(log.Ltime | log.Lshortfile)
+
+	config := new(Config)
 
 	flag.Usage = func() {
 		fmt.Fprintln(os.Stderr, doc)
@@ -32,7 +35,7 @@ func ReadConfig() (config Config) {
 			"-->",
 	)
 
-	outfile := flag.String(
+	flag.StringVar(&config.OutputFilePath,
 		"outfile", "SMARTY_REVIEW_LOG", ""+
 			"The path or name of the environment variable containing the"+"\n"+
 			"path to your pre-existing code review file. If the file exists"+"\n"+
@@ -52,10 +55,39 @@ func ReadConfig() (config Config) {
 
 	flag.Parse()
 
-	config.OutputFilePath = os.Getenv(*outfile)
-	config.GitRepositoryRoots = strings.Split(os.Getenv(*gitRoots), ":")
 	config.GitRepositoryPaths = flag.Args()
+	if len(config.GitRepositoryPaths) == 0 {
+		config.GitRepositoryRoots = strings.Split(os.Getenv(*gitRoots), ":")
+	}
 	return config
+}
+
+func (this *Config) OpenOutputWriter() io.WriteCloser {
+	this.OutputFilePath = strings.TrimSpace(this.OutputFilePath)
+	if this.OutputFilePath == "" {
+		return os.Stdout
+	}
+
+	path, found := os.LookupEnv(this.OutputFilePath)
+	if found {
+		log.Printf("Found output path in environment variable: %s=%s", this.OutputFilePath, path)
+	} else {
+		path = this.OutputFilePath
+	}
+
+	stat, err := os.Stat(path)
+	if err == nil && err != os.ErrNotExist {
+		file, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, stat.Mode())
+		if err == nil {
+			log.Println("Final report will be appended to", path)
+			return file
+		} else {
+			log.Printf("Could not open file for appending: [%s] Error: %v", this.OutputFilePath, err)
+		}
+	}
+
+	log.Println("Final report will appear in stdout.")
+	return os.Stdout
 }
 
 const rawDoc = `# gitreview
@@ -63,21 +95,23 @@ const rawDoc = `# gitreview
 gitreview facilitates visual inspection (code review) of git
 repositories that meet any of the following criteria:
 
-2. Are behind the 'origin' remote,
-3. Are ahead of their 'origin' remote,
-1. Have uncommitted changes (including untracked files).
+1. Are behind the 'origin' remote,
+2. Are ahead of their 'origin' remote,
+3. Have uncommitted changes (including untracked files).
 
-To ascertain the status of a repository we run variants of:
+We use variants of the followiong commands to ascertain the
+status of a repository:
 
-1. 'git status'
-2. 'git fetch'
-3. 'git rev-list'
+- 'git remote'    (shows remote address)
+- 'git status'    (shows uncommitted files)
+- 'git fetch'     (finds new commits/tags/branches)
+- 'git rev-list'  (lists commits behind/ahead of master)
 
 ...all of which should be safe enough. Each repository
-that meets the criteria above will be presented for review.
+that meets any criteria above will be presented for review.
 After all reviews are complete a concatenated report of all
-output from 'git fetch' for repositories that were behind 
-their origin is printed to stdout. Only repositories with 
+output from 'git fetch' for repositories that were behind
+their origin is printed to stdout. Only repositories with
 "smartystreets" in their path are included in this report.
 
 Repositories are identified for consideration from path values
