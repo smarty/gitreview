@@ -3,15 +3,17 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"sync"
 )
 
-
 const (
-	gitStatusCommand       = "git status --porcelain -uall"
-	gitFetchCommand        = "git fetch" // --dry-run"
-	pendingReviewIndicator = ".." // ie. [7761a97..1bbecb6  master     -> origin/master]
+	gitStatusCommand       = "git status --porcelain -uall"                             // parse-able output, including untracked
+	gitFetchCommand        = "git fetch"                                                // --dry-run" // for debugging
+	gitRevListCommand      = "git rev-list --left-right --count master...origin/master" // [4	6]    // (master is 4 ahead, 6 behind)
+	pendingReviewIndicator = ".."                                                       // ie. [7761a97..1bbecb6  master     -> origin/master]
+	gitErrorTemplate       = "[ERROR] Could not execute [%s]: %v" + "\n"
 )
 
 type GitClient struct {
@@ -77,6 +79,7 @@ func (this *GitWorker) git(path string) *GitReport {
 	report := &GitReport{RepoPath: path}
 	report.GitStatus()
 	report.GitFetch()
+	report.GitRevList()
 	return report
 }
 
@@ -86,28 +89,42 @@ type GitReport struct {
 	StatusError  string
 	FetchOutput  string
 	FetchError   string
+	RevListError string
+	RevListAhead string
 }
 
 func (this *GitReport) GitStatus() {
 	out, err := execute(this.RepoPath, gitStatusCommand)
 	if err != nil {
-		this.StatusError = fmt.Sprintln("[ERROR] Could not ascertain repo status:", err)
+		this.StatusError = fmt.Sprintf(gitErrorTemplate, gitStatusCommand, err)
 		return
 	}
 	if output := string(out); len(strings.TrimSpace(output)) > 0 {
 		this.StatusOutput = output
 	}
 }
-
 func (this *GitReport) GitFetch() {
 	out, err := execute(this.RepoPath, gitFetchCommand)
 	if err != nil {
-		this.FetchError = fmt.Sprintln("[ERROR] Could not fetch:", err)
+		this.FetchError = fmt.Sprintf(gitErrorTemplate, gitFetchCommand, err)
 	}
 	if output := string(out); strings.Contains(output, pendingReviewIndicator) {
 		this.FetchOutput = output
 	}
-
+}
+func (this *GitReport) GitRevList() {
+	out, err := execute(this.RepoPath, gitRevListCommand)
+	if err != nil {
+		this.RevListError = fmt.Sprintf(gitErrorTemplate, gitRevListCommand, err)
+	}
+	fields := strings.Fields(strings.TrimSpace(string(out)))
+	if len(fields) < 2 {
+		return
+	}
+	ahead, _ := strconv.Atoi(fields[0])
+	if ahead > 0 {
+		this.RevListAhead = fmt.Sprintf("The master branch is %d commits ahead of origin/master.\n", ahead)
+	}
 }
 
 func merge(fannedOut ...chan *GitReport) chan *GitReport {

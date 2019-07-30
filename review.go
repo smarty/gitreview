@@ -67,13 +67,19 @@ func (this *GitReviewer) GitFetchAll() {
 			this.problems[fetch.RepoPath] += fetch.StatusError
 		}
 		if len(fetch.StatusOutput) > 0 {
-			this.messes[fetch.RepoPath] = fetch.StatusOutput
+			this.messes[fetch.RepoPath] += fetch.StatusOutput
 		}
 		if len(fetch.FetchError) > 0 {
 			this.problems[fetch.RepoPath] += fetch.FetchError
 		}
 		if len(fetch.FetchOutput) > 0 {
-			this.reviews[fetch.RepoPath] = fetch.FetchOutput
+			this.reviews[fetch.RepoPath] += fetch.FetchOutput
+		}
+		if len(fetch.RevListError) > 0 {
+			this.problems[fetch.RepoPath] += fetch.RevListError
+		}
+		if len(fetch.RevListAhead) > 0 {
+			this.messes[fetch.RepoPath] += fetch.RevListAhead
 		}
 	}
 }
