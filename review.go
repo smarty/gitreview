@@ -10,25 +10,30 @@ import (
 )
 
 type GitReviewer struct {
-	gitGUI       string
-	repoPaths    []string
-	pathToRemote map[string]string
-	problems     map[string]string
-	messes       map[string]string
-	reviews      map[string]string
+	gitGUI    string
+	repoPaths []string
+
+	erred   map[string]string
+	messy   map[string]string
+	ahead   map[string]string
+	behind  map[string]string
+	fetched map[string]string
+	journal map[string]string
 }
 
 func NewGitReviewer(gitRoots, gitPaths []string, gitGUI string) *GitReviewer {
 	return &GitReviewer{
+		gitGUI: gitGUI,
 		repoPaths: append(
 			collectGitRepositories(gitRoots),
 			filterGitRepositories(gitPaths)...
 		),
-		gitGUI:       gitGUI,
-		pathToRemote: make(map[string]string),
-		problems:     make(map[string]string),
-		messes:       make(map[string]string),
-		reviews:      make(map[string]string),
+		erred:   make(map[string]string),
+		messy:   make(map[string]string),
+		ahead:   make(map[string]string),
+		behind:  make(map[string]string),
+		fetched: make(map[string]string),
+		journal: make(map[string]string),
 	}
 }
 
@@ -36,52 +41,60 @@ func (this *GitReviewer) GitAnalyzeAll() {
 	log.Printf("Analyzing %d git repositories...", len(this.repoPaths))
 	reports := NewAnalyzer(workerCount).AnalyzeAll(this.repoPaths)
 	for _, report := range reports {
-		this.pathToRemote[report.RepoPath] = report.RemoteOutput
-
 		if len(report.StatusError) > 0 {
-			this.problems[report.RepoPath] += report.StatusError
-			log.Println("[WARN]", report.StatusError)
+			this.erred[report.RepoPath] += report.StatusError
+			log.Println("[ERROR]", report.StatusError)
 		}
 		if len(report.FetchError) > 0 {
-			this.problems[report.RepoPath] += report.FetchError
-			log.Println("[WARN]", report.FetchError)
+			this.erred[report.RepoPath] += report.FetchError
+			log.Println("[ERROR]", report.FetchError)
 		}
 		if len(report.RevListError) > 0 {
-			this.problems[report.RepoPath] += report.RevListError
-			log.Println("[WARN]", report.RevListError)
+			this.erred[report.RepoPath] += report.RevListError
+			log.Println("[ERROR]", report.RevListError)
 		}
 
 		if len(report.StatusOutput) > 0 {
-			this.messes[report.RepoPath] += report.StatusOutput
+			this.messy[report.RepoPath] += report.StatusOutput
 		}
 		if len(report.RevListAhead) > 0 {
-			this.messes[report.RepoPath] += report.RevListAhead
+			this.ahead[report.RepoPath] += report.RevListAhead
+		}
+		if len(report.RevListBehind) > 0 {
+			this.behind[report.RepoPath] += report.RevListBehind
 		}
 
 		if len(report.FetchOutput) > 0 {
-			this.reviews[report.RepoPath] += report.FetchOutput
-		}
-		if len(report.FetchOutput) > 0 && len(report.RevListBehind) > 0 {
-			this.reviews[report.RepoPath] += report.RevListOutput
+			this.fetched[report.RepoPath] += report.FetchOutput + report.RevListOutput
+			this.journal[report.RepoPath] += report.FetchOutput + report.RevListOutput
 		}
 	}
 }
 
 func (this *GitReviewer) ReviewAll() {
-	if len(this.problems)+len(this.messes)+len(this.reviews) == 0 {
+	for path := range this.journal {
+		if !strings.Contains(strings.ToLower(path), "smartystreets") {
+			delete(this.journal, path) // Don't include external code in review log.
+		}
+	}
+
+	reviewable := sortUniqueKeys(this.erred, this.messy, this.ahead, this.behind, this.fetched, this.journal)
+	if len(reviewable) == 0 {
 		log.Println("Nothing to review at this time.")
 		return
 	}
 
-	printMap(this.problems, "The following %d repositories experienced errors:")
-	printMap(this.messes, "The following %d repositories have uncommitted changes or are ahead of origin master:")
-	printMap(this.reviews, "The following %d repositories have new content or are behind origin master:")
+	printMapKeys(this.erred, "Repositories with git errors: %d")
+	printMapKeys(this.messy, "Repositories with uncommitted changes: %d")
+	printMapKeys(this.ahead, "Repositories ahead of origin master: %d")
+	printMapKeys(this.behind, "Repositories behind origin master: %d")
+	printMapKeys(this.fetched, "Repositories with new content since the last review: %d")
+	printStrings(reviewable, "Repositories to be reviewed: %d")
+	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
 
-	keys := sortUniqueKeys(this.problems, this.messes, this.reviews)
-	log.Printf("A total of %d repositories should be reviewed.", len(keys))
-	prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows)...", len(keys)))
+	prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows)...", len(reviewable)))
 
-	for _, path := range keys {
+	for _, path := range reviewable {
 		log.Printf("Opening %s at %s", this.gitGUI, path)
 		err := exec.Command(this.gitGUI, path).Run()
 		if err != nil {
@@ -90,15 +103,10 @@ func (this *GitReviewer) ReviewAll() {
 	}
 }
 
-func (this *GitReviewer) PrintCodeReviewLogEntry(output io.Writer) {
-	for path := range this.reviews {
-		if !strings.Contains(strings.ToLower(path), "smartystreets") {
-			delete(this.reviews, path) // Don't include external code in review log.
-		}
-	}
+func (this *GitReviewer) PrintCodeReviewLogEntry(output io.WriteCloser) {
+	defer close_(output)
 
-	if len(this.reviews) == 0 {
-		log.Println("Nothing to report at this time.")
+	if len(this.journal) == 0 {
 		return
 	}
 
@@ -108,7 +116,7 @@ func (this *GitReviewer) PrintCodeReviewLogEntry(output io.Writer) {
 	fmt.Fprintln(output)
 	fmt.Fprintln(output, "##", time.Now().Format("2006-01-02"))
 	fmt.Fprintln(output)
-	for _, review := range this.reviews {
+	for _, review := range this.journal {
 		fmt.Fprintln(output, review)
 	}
 }

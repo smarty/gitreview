@@ -4,9 +4,6 @@ import "io"
 
 func main() {
 	config := ReadConfig()
-	writer := config.OpenOutputWriter()
-	defer close_(writer)
-
 	reviewer := NewGitReviewer(
 		config.GitRepositoryRoots,
 		config.GitRepositoryPaths,
@@ -14,7 +11,7 @@ func main() {
 	)
 	reviewer.GitAnalyzeAll()
 	reviewer.ReviewAll()
-	reviewer.PrintCodeReviewLogEntry(writer)
+	reviewer.PrintCodeReviewLogEntry(config.OpenOutputWriter())
 }
 
 func close_(closer io.Closer) { _ = closer.Close() }
