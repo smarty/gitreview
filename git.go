@@ -88,17 +88,30 @@ func (this *GitReport) GitRevList() {
 
 func (this *GitReport) Progress() string {
 	status := ""
-	if len(this.StatusError + this.FetchError + this.RemoteError + this.RevListError) > 0 {
-		status += "e"
+	if len(this.StatusError+this.FetchError+this.RemoteError+this.RevListError) > 0 {
+		status += "!"
+	} else {
+		status += " "
 	}
 	if len(this.StatusOutput) > 0 {
-		status += "m"
+		status += "M"
+	} else {
+		status += " "
 	}
 	if len(this.RevListAhead) > 0 {
-		status += "a"
+		status += "A"
+	} else {
+		status += " "
 	}
 	if len(this.RevListBehind) > 0 {
-		status += "b"
+		status += "B"
+	} else {
+		status += " "
 	}
-	return fmt.Sprintf("[%-4s] %s", status, this.RepoPath)
+	if len(this.FetchOutput) > 0 {
+		status += "F"
+	} else {
+		status += " "
+	}
+	return fmt.Sprintf("[%-5s] %s", status, this.RepoPath)
 }
