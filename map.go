@@ -19,14 +19,21 @@ func sortUniqueKeys(maps ...map[string]string) (unique []string) {
 	return unique
 }
 
-func printMap(m map[string]string, preamble string) {
-	if len(m) == 0 {
+func mapKeys(m map[string]string) (keys []string) {
+	for key := range m {
+		keys = append(keys, key)
+	}
+	return keys
+}
+func printMapKeys(m map[string]string, preamble string) {
+	printStrings(mapKeys(m), preamble)
+}
+func printStrings(paths []string, preamble string) {
+	log.Printf(preamble, len(paths))
+	if len(paths) == 0 {
 		return
 	}
-	log.Printf(preamble, len(m))
-	log.Println()
-	for path := range m {
-		log.Println(path)
+	for _, path := range paths {
+		log.Println("  " + path)
 	}
-	log.Println()
 }

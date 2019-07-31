@@ -2,111 +2,100 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 	"time"
 )
 
 type GitReviewer struct {
-	gitGUI    string
+	config    *Config
 	repoPaths []string
-	problems  map[string]string
-	messes    map[string]string
-	reviews   map[string]string
+
+	erred   map[string]string
+	messy   map[string]string
+	ahead   map[string]string
+	behind  map[string]string
+	fetched map[string]string
+	journal map[string]string
 }
 
-func NewGitReviewer(gitRoots []string, gitGUI string) *GitReviewer {
+func NewGitReviewer(config *Config) *GitReviewer {
 	return &GitReviewer{
-		repoPaths: collectGitRepositoryPaths(gitRoots),
-		gitGUI:    gitGUI,
-		problems:  make(map[string]string),
-		messes:    make(map[string]string),
-		reviews:   make(map[string]string),
+		config: config,
+		repoPaths: append(
+			collectGitRepositories(config.GitRepositoryRoots),
+			filterGitRepositories(config.GitRepositoryPaths)...,
+		),
+		erred:   make(map[string]string),
+		messy:   make(map[string]string),
+		ahead:   make(map[string]string),
+		behind:  make(map[string]string),
+		fetched: make(map[string]string),
+		journal: make(map[string]string),
 	}
 }
 
-func collectGitRepositoryPaths(gitRoots []string) (paths []string) {
-	for _, root := range gitRoots {
-		if root == "." {
-			continue
+func (this *GitReviewer) GitAnalyzeAll() {
+	log.Printf("Analyzing %d git repositories...", len(this.repoPaths))
+	log.Println("Legend: [!] = error; [M] = messy; [A] = ahead; [B] = behind; [F] = fetched;")
+	reports := NewAnalyzer(workerCount).AnalyzeAll(this.repoPaths)
+	for _, report := range reports {
+		if len(report.StatusError) > 0 {
+			this.erred[report.RepoPath] += report.StatusError
+			log.Println(report.RepoPath, report.StatusError)
 		}
-		if strings.TrimSpace(root) == "" {
-			continue
+		if len(report.FetchError) > 0 {
+			this.erred[report.RepoPath] += report.FetchError
+			log.Println(report.RepoPath, report.FetchError)
 		}
-		listing, err := ioutil.ReadDir(root)
-		if err != nil {
-			log.Println("Couldn't resolve path (skipping):", err)
-			continue
+		if len(report.RevListError) > 0 {
+			this.erred[report.RepoPath] += report.RevListError
+			log.Println(report.RepoPath, report.RevListError)
 		}
-		for _, item := range listing {
-			path := filepath.Join(root, item.Name())
-			if !item.IsDir() {
-				continue
-			}
-			git := filepath.Join(path, ".git")
-			_, err := os.Stat(git)
-			if os.IsNotExist(err) {
-				continue
-			}
 
-			paths = append(paths, path)
+		if len(report.StatusOutput) > 0 {
+			this.messy[report.RepoPath] += report.StatusOutput
+		}
+		if len(report.RevListAhead) > 0 {
+			this.ahead[report.RepoPath] += report.RevListAhead
+		}
+		if len(report.RevListBehind) > 0 {
+			this.behind[report.RepoPath] += report.RevListBehind
+		}
+
+		if this.config.GitFetch && len(report.FetchOutput) > 0 {
+			this.fetched[report.RepoPath] += report.FetchOutput + report.RevListOutput
+			this.journal[report.RepoPath] += report.FetchOutput + report.RevListOutput
 		}
 	}
-
-	return paths
-}
-
-func (this *GitReviewer) GitFetchAll() {
-	log.Printf("Running `git status` and `get fetch` for %d repos...", len(this.repoPaths))
-	for _, fetch := range NewGitClient(16).ScanAll(this.repoPaths) {
-		if len(fetch.StatusError) > 0 {
-			this.problems[fetch.RepoPath] += fetch.StatusError
-		}
-		if len(fetch.StatusOutput) > 0 {
-			this.messes[fetch.RepoPath] = fetch.StatusOutput
-		}
-		if len(fetch.FetchError) > 0 {
-			this.problems[fetch.RepoPath] += fetch.FetchError
-		}
-		if len(fetch.FetchOutput) > 0 {
-			this.reviews[fetch.RepoPath] = fetch.FetchOutput
-		}
-	}
-}
-
-func (this *GitReviewer) formatFetchProgress(index int) string {
-	progress := strings.TrimSpace(fmt.Sprintf("%3d / %-3d", index+1, len(this.repoPaths)))
-	progress = "(" + progress + ")"
-	for len(progress) < len("(999 / 999)") {
-		progress = " " + progress
-	}
-	return progress
-}
-
-func (this *GitReviewer) reviewIsPending() bool {
-	return len(this.problems)+len(this.messes)+len(this.reviews) > 0
 }
 
 func (this *GitReviewer) ReviewAll() {
-	if !this.reviewIsPending() {
-		log.Println("Nothing to review today.")
+	for path := range this.journal {
+		if !strings.Contains(strings.ToLower(path), "smartystreets") {
+			delete(this.journal, path) // Don't include external code in review log.
+		}
+	}
+
+	reviewable := sortUniqueKeys(this.erred, this.messy, this.ahead, this.behind, this.fetched, this.journal)
+	if len(reviewable) == 0 {
+		log.Println("Nothing to review at this time.")
 		return
 	}
 
-	printMap(this.problems, "The following %d repositories experienced errors:")
-	printMap(this.messes, "The following %d repositories have uncommitted changes:")
-	printMap(this.reviews, "The following %d repositories have been updated:")
+	printMapKeys(this.erred, "Repositories with git errors: %d")
+	printMapKeys(this.messy, "Repositories with uncommitted changes: %d")
+	printMapKeys(this.ahead, "Repositories ahead of origin master: %d")
+	printMapKeys(this.behind, "Repositories behind origin master: %d")
+	printMapKeys(this.fetched, "Repositories with new content since the last review: %d")
+	printStrings(reviewable, "Repositories to be reviewed: %d")
 
-	keys := sortUniqueKeys(this.problems, this.messes, this.reviews)
-	log.Printf("A total of %d repositories need to be reviewed.", len(keys))
-	prompt(fmt.Sprintf("Press <ENTER> to initiate review (will open %d review windows)...", len(keys)))
+	prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows)...", len(reviewable)))
 
-	for _, path := range keys {
-		err := exec.Command(this.gitGUI, path).Run()
+	for _, path := range reviewable {
+		log.Printf("Opening %s at %s", this.config.GitGUILauncher, path)
+		err := exec.Command(this.config.GitGUILauncher, path).Run()
 		if err != nil {
 			log.Println("Failed to open git GUI:", err)
 		}
@@ -114,19 +103,24 @@ func (this *GitReviewer) ReviewAll() {
 }
 
 func (this *GitReviewer) PrintCodeReviewLogEntry() {
-	if !this.reviewIsPending() {
+	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
+
+	if len(this.journal) == 0 {
 		return
 	}
 
+	writer := this.config.OpenOutputWriter()
+	defer func() { _ = writer.Close() }()
+
 	prompt("Press <ENTER> to conclude review process and print code review log entry...")
 
-	fmt.Println()
-	fmt.Println()
-	fmt.Printf("## %s\n\n", time.Now().Format("2006-01-02"))
-	for _, fetch := range this.reviews {
-		if !strings.Contains(strings.ToLower(fetch), "smartystreets") {
-			continue // Don't include external code in review log.
-		}
-		fmt.Println(fetch)
+	fmt.Fprintln(writer)
+	fmt.Fprintln(writer)
+	fmt.Fprintln(writer, "##", time.Now().Format("2006-01-02"))
+	fmt.Fprintln(writer)
+	for _, review := range this.journal {
+		fmt.Fprintln(writer, review)
 	}
 }
+
+const workerCount = 16

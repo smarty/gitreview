@@ -2,8 +2,8 @@ package main
 
 func main() {
 	config := ReadConfig()
-	reviewer := NewGitReviewer(config.GitRoots, config.GitGUI)
-	reviewer.GitFetchAll()
+	reviewer := NewGitReviewer(config)
+	reviewer.GitAnalyzeAll()
 	reviewer.ReviewAll()
 	reviewer.PrintCodeReviewLogEntry()
 }
