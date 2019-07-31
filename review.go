@@ -100,11 +100,9 @@ func (this *GitReviewer) PrintCodeReviewLogEntry(output io.Writer) {
 
 	fmt.Fprintln(output)
 	fmt.Fprintln(output)
-	fmt.Fprintf(output, "## %s\n\n", time.Now().Format("2006-01-02"))
-	for path, review := range this.reviews {
-		if !strings.Contains(strings.ToLower(path), "smartystreets") {
-			continue // Don't include external code in review log.
-		}
+	fmt.Fprintln(output, "##", time.Now().Format("2006-01-02"))
+	fmt.Fprintln(output)
+	for _, review := range this.reviews {
 		fmt.Fprintln(output, review)
 	}
 }
