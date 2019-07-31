@@ -85,3 +85,20 @@ func (this *GitReport) GitRevList() {
 		this.RevListBehind = fmt.Sprintf("The master branch is %d commits behind origin/master.\n", behind)
 	}
 }
+
+func (this *GitReport) Progress() string {
+	status := ""
+	if len(this.StatusError + this.FetchError + this.RemoteError + this.RevListError) > 0 {
+		status += "e"
+	}
+	if len(this.StatusOutput) > 0 {
+		status += "m"
+	}
+	if len(this.RevListAhead) > 0 {
+		status += "a"
+	}
+	if len(this.RevListBehind) > 0 {
+		status += "b"
+	}
+	return fmt.Sprintf("[%-4s] %s", status, this.RepoPath)
+}
