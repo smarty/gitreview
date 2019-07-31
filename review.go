@@ -61,7 +61,6 @@ func (this *GitReviewer) GitAnalyzeAll() {
 		if len(report.FetchOutput) > 0 {
 			this.reviews[report.RepoPath] += report.FetchOutput
 		}
-
 		if len(report.FetchOutput) > 0 && len(report.RevListBehind) > 0 {
 			this.reviews[report.RepoPath] += report.RevListOutput
 		}
