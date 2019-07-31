@@ -90,7 +90,6 @@ func (this *GitReviewer) ReviewAll() {
 	printMapKeys(this.behind, "Repositories behind origin master: %d")
 	printMapKeys(this.fetched, "Repositories with new content since the last review: %d")
 	printStrings(reviewable, "Repositories to be reviewed: %d")
-	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
 
 	prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows)...", len(reviewable)))
 
@@ -103,21 +102,24 @@ func (this *GitReviewer) ReviewAll() {
 	}
 }
 
-func (this *GitReviewer) PrintCodeReviewLogEntry(output io.WriteCloser) {
-	defer close_(output)
+func (this *GitReviewer) PrintCodeReviewLogEntry(output func() io.WriteCloser) {
+	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
 
 	if len(this.journal) == 0 {
 		return
 	}
 
+	writer := output()
+	defer func() { _ = writer.Close() }()
+
 	prompt("Press <ENTER> to conclude review process and print code review log entry...")
 
-	fmt.Fprintln(output)
-	fmt.Fprintln(output)
-	fmt.Fprintln(output, "##", time.Now().Format("2006-01-02"))
-	fmt.Fprintln(output)
+	fmt.Fprintln(writer)
+	fmt.Fprintln(writer)
+	fmt.Fprintln(writer, "##", time.Now().Format("2006-01-02"))
+	fmt.Fprintln(writer)
 	for _, review := range this.journal {
-		fmt.Fprintln(output, review)
+		fmt.Fprintln(writer, review)
 	}
 }
 

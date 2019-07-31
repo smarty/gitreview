@@ -1,7 +1,5 @@
 package main
 
-import "io"
-
 func main() {
 	config := ReadConfig()
 	reviewer := NewGitReviewer(
@@ -11,7 +9,5 @@ func main() {
 	)
 	reviewer.GitAnalyzeAll()
 	reviewer.ReviewAll()
-	reviewer.PrintCodeReviewLogEntry(config.OpenOutputWriter())
+	reviewer.PrintCodeReviewLogEntry(config.OpenOutputWriter)
 }
-
-func close_(closer io.Closer) { _ = closer.Close() }
