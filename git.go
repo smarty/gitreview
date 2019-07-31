@@ -15,17 +15,20 @@ const (
 )
 
 type GitReport struct {
-	RepoPath      string
+	RepoPath string
+
+	RemoteError  string
+	StatusError  string
+	FetchError   string
+	RevListError string
+
 	RemoteOutput  string
-	RemoteError   string
 	StatusOutput  string
-	StatusError   string
 	FetchOutput   string
-	FetchError    string
-	RevListError  string
+	RevListOutput string
+
 	RevListAhead  string
 	RevListBehind string
-	RevListOutput string
 }
 
 func (this *GitReport) GitRemote() {
