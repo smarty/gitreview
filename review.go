@@ -91,6 +91,12 @@ func (this *GitReviewer) ReviewAll() {
 }
 
 func (this *GitReviewer) PrintCodeReviewLogEntry(output io.Writer) {
+	for path := range this.reviews {
+		if !strings.Contains(strings.ToLower(path), "smartystreets") {
+			delete(this.reviews, path) // Don't include external code in review log.
+		}
+	}
+
 	if len(this.reviews) == 0 {
 		log.Println("Nothing to report at this time.")
 		return
