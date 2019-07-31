@@ -78,8 +78,8 @@ func (this *GitReviewer) ReviewAll() {
 	printMap(this.reviews, "The following %d repositories have new content or are behind origin master:")
 
 	keys := sortUniqueKeys(this.problems, this.messes, this.reviews)
-	log.Printf("A total of %d repositories need to be reviewed.", len(keys))
-	prompt(fmt.Sprintf("Press <ENTER> to initiate review (will open %d review windows)...", len(keys)))
+	log.Printf("A total of %d repositories should be reviewed.", len(keys))
+	prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows)...", len(keys)))
 
 	for _, path := range keys {
 		log.Printf("Opening %s at %s", this.gitGUI, path)
