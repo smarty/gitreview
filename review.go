@@ -34,7 +34,7 @@ func NewGitReviewer(gitRoots, gitPaths []string, gitGUI string) *GitReviewer {
 
 func (this *GitReviewer) GitAnalyzeAll() {
 	log.Printf("Analyzing %d git repositories...", len(this.repoPaths))
-	reports := NewAnalyzer(16).AnalyzeAll(this.repoPaths)
+	reports := NewAnalyzer(workerCount).AnalyzeAll(this.repoPaths)
 	for _, report := range reports {
 		this.pathToRemote[report.RepoPath] = report.RemoteOutput
 
@@ -108,3 +108,5 @@ func (this *GitReviewer) PrintCodeReviewLogEntry(output io.Writer) {
 		fmt.Fprintln(output, review)
 	}
 }
+
+const workerCount = 16
