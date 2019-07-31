@@ -6,12 +6,12 @@ import (
 )
 
 const (
-	gitRemoteCommand       = "git remote -v"                                    // ie. [origin	git@github.com:mdwhatcott/gitreview.git (fetch)]
-	gitStatusCommand       = "git status --porcelain -uall"                     // parse-able output, including untracked
-	gitFetchCommand        = "git fetch "                                       // --dry-run"  // for debugging TODO
-	gitRevListCommand      = "git rev-list --left-right master...origin/master" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
-	pendingReviewIndicator = ".."                                               // ie. [7761a97..1bbecb6  master     -> origin/master]
-	gitErrorTemplate       = "[ERROR] Could not execute [%s]: %v" + "\n"
+	gitRemoteCommand      = "git remote -v"                                    // ie. [origin	git@github.com:mdwhatcott/gitreview.git (fetch)]
+	gitStatusCommand      = "git status --porcelain -uall"                     // parse-able output, including untracked
+	gitFetchCommand       = "git fetch "                                       // --dry-run"  // for debugging TODO
+	gitFetchPendingReview = ".."                                               // ie. [7761a97..1bbecb6  master     -> origin/master]
+	gitRevListCommand     = "git rev-list --left-right master...origin/master" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
+	gitErrorTemplate      = "[ERROR] Could not execute [%s]: %v" + "\n"
 )
 
 type GitReport struct {
@@ -57,7 +57,7 @@ func (this *GitReport) GitFetch() {
 	if err != nil {
 		this.FetchError = fmt.Sprintf(gitErrorTemplate, gitFetchCommand, err)
 	}
-	if output := string(out); strings.Contains(output, pendingReviewIndicator) {
+	if output := string(out); strings.Contains(output, gitFetchPendingReview) {
 		this.FetchOutput = output
 	}
 }
