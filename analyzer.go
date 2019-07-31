@@ -1,6 +1,9 @@
 package main
 
-import "sync"
+import (
+	"sort"
+	"sync"
+)
 
 type Analyzer struct {
 	workerCount int
@@ -20,6 +23,9 @@ func (this *Analyzer) AnalyzeAll(paths []string) (fetches []*GitReport) {
 	for fetch := range merge(outputs...) {
 		fetches = append(fetches, fetch)
 	}
+	sort.Slice(fetches, func(i, j int) bool {
+		return fetches[i].RepoPath < fetches[j].RepoPath
+	})
 	return fetches
 }
 
