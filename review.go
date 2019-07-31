@@ -42,15 +42,15 @@ func (this *GitReviewer) GitAnalyzeAll() {
 	for _, report := range reports {
 		if len(report.StatusError) > 0 {
 			this.erred[report.RepoPath] += report.StatusError
-			log.Println("[ERROR]", report.StatusError)
+			log.Println(report.RepoPath, report.StatusError)
 		}
 		if len(report.FetchError) > 0 {
 			this.erred[report.RepoPath] += report.FetchError
-			log.Println("[ERROR]", report.FetchError)
+			log.Println(report.RepoPath, report.FetchError)
 		}
 		if len(report.RevListError) > 0 {
 			this.erred[report.RepoPath] += report.RevListError
-			log.Println("[ERROR]", report.RevListError)
+			log.Println(report.RepoPath, report.RevListError)
 		}
 
 		if len(report.StatusOutput) > 0 {
@@ -63,7 +63,7 @@ func (this *GitReviewer) GitAnalyzeAll() {
 			this.behind[report.RepoPath] += report.RevListBehind
 		}
 
-		if len(report.FetchOutput) > 0 {
+		if this.config.GitFetch && len(report.FetchOutput) > 0 {
 			this.fetched[report.RepoPath] += report.FetchOutput + report.RevListOutput
 			this.journal[report.RepoPath] += report.FetchOutput + report.RevListOutput
 		}

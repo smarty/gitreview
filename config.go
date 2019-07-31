@@ -68,7 +68,7 @@ func ReadConfig() *Config {
 		config.GitRepositoryRoots = strings.Split(os.Getenv(*gitRoots), ":")
 	}
 	if !config.GitFetch {
-		log.Println("Running git fetch with --dry-run.")
+		log.Println("Running git fetch with --dry-run (updated repositories will not be reviewed).")
 		gitFetchCommand += " --dry-run"
 	}
 	return config
