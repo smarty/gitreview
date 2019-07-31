@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-const (
+var (
 	gitRemoteCommand      = "git remote -v"                                    // ie. [origin	git@github.com:mdwhatcott/gitreview.git (fetch)]
 	gitStatusCommand      = "git status --porcelain -uall"                     // parse-able output, including untracked
-	gitFetchCommand       = "git fetch "                                       // --dry-run"  // for debugging TODO
+	gitFetchCommand       = "git fetch"                                        // --dry-run"  // for debugging
 	gitFetchPendingReview = ".."                                               // ie. [7761a97..1bbecb6  master     -> origin/master]
 	gitRevListCommand     = "git rev-list --left-right master...origin/master" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
 	gitErrorTemplate      = "[ERROR] Could not execute [%s]: %v" + "\n"

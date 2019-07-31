@@ -34,6 +34,9 @@ CLI Flags:
 
 
 ```
+  -fetch
+    	When false, suppress all git fetch operations via --dry-run.
+    	--> (default true)
   -gui string
     	The external git GUI application to use for visual reviews.
     	--> (default "smerge")

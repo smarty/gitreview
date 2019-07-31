@@ -10,6 +10,7 @@ import (
 )
 
 type Config struct {
+	GitFetch           bool
 	GitRepositoryPaths []string
 	GitRepositoryRoots []string
 	GitGUILauncher     string
@@ -43,6 +44,13 @@ func ReadConfig() *Config {
 			"-->",
 	)
 
+	flag.BoolVar(&config.GitFetch,
+		"fetch", true, ""+
+			"When false, suppress all git fetch operations via --dry-run."+"\n"+
+			"Repositories with updates will still be included in the review."+"\n"+
+			"-->",
+	)
+
 	gitRoots := flag.String(
 		"roots", "CDPATH", ""+
 			"The name of the environment variable containing colon-separated"+"\n"+
@@ -58,6 +66,10 @@ func ReadConfig() *Config {
 	config.GitRepositoryPaths = flag.Args()
 	if len(config.GitRepositoryPaths) == 0 {
 		config.GitRepositoryRoots = strings.Split(os.Getenv(*gitRoots), ":")
+	}
+	if !config.GitFetch {
+		log.Println("Running git fetch with --dry-run.")
+		gitFetchCommand += " --dry-run"
 	}
 	return config
 }
