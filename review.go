@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"os/exec"
 	"strings"
@@ -10,7 +9,7 @@ import (
 )
 
 type GitReviewer struct {
-	gitGUI    string
+	config    *Config
 	repoPaths []string
 
 	erred   map[string]string
@@ -21,12 +20,12 @@ type GitReviewer struct {
 	journal map[string]string
 }
 
-func NewGitReviewer(gitRoots, gitPaths []string, gitGUI string) *GitReviewer {
+func NewGitReviewer(config *Config) *GitReviewer {
 	return &GitReviewer{
-		gitGUI: gitGUI,
+		config: config,
 		repoPaths: append(
-			collectGitRepositories(gitRoots),
-			filterGitRepositories(gitPaths)...
+			collectGitRepositories(config.GitRepositoryRoots),
+			filterGitRepositories(config.GitRepositoryPaths)...
 		),
 		erred:   make(map[string]string),
 		messy:   make(map[string]string),
@@ -94,22 +93,22 @@ func (this *GitReviewer) ReviewAll() {
 	prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows)...", len(reviewable)))
 
 	for _, path := range reviewable {
-		log.Printf("Opening %s at %s", this.gitGUI, path)
-		err := exec.Command(this.gitGUI, path).Run()
+		log.Printf("Opening %s at %s", this.config.GitGUILauncher, path)
+		err := exec.Command(this.config.GitGUILauncher, path).Run()
 		if err != nil {
 			log.Println("Failed to open git GUI:", err)
 		}
 	}
 }
 
-func (this *GitReviewer) PrintCodeReviewLogEntry(output func() io.WriteCloser) {
+func (this *GitReviewer) PrintCodeReviewLogEntry() {
 	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
 
 	if len(this.journal) == 0 {
 		return
 	}
 
-	writer := output()
+	writer := this.config.OpenOutputWriter()
 	defer func() { _ = writer.Close() }()
 
 	prompt("Press <ENTER> to conclude review process and print code review log entry...")
