@@ -3,24 +3,28 @@
 gitreview facilitates visual inspection (code review) of git
 repositories that meet any of the following criteria:
 
-1. Are behind the `origin` remote,
-2. Are ahead of their `origin` remote,
-3. Have uncommitted changes (including untracked files).
+1. New content was fetched
+2. Behind origin/master
+3. Ahead of origin/master
+4. Messy (have uncommitted state)
+5. Throw errors for the required git operations (listed below)
 
-We use variants of the followiong commands to ascertain the
-status of a repository:
+We use variants of the following commands to ascertain the
+status of each repository:
 
 - `git remote`    (shows remote address)
 - `git status`    (shows uncommitted files)
 - `git fetch`     (finds new commits/tags/branches)
 - `git rev-list`  (lists commits behind/ahead of master)
 
-...all of which should be safe enough. Each repository
-that meets any criteria above will be presented for review.
-After all reviews are complete a concatenated report of all
-output from `git fetch` for repositories that were behind
-their origin is printed to stdout. Only repositories with
-"smartystreets" in their path are included in this report.
+...all of which should be safe enough. 
+
+Each repository that meets any criteria above will be
+presented for review. After all reviews are complete a
+concatenated report of all output from `git fetch` for
+repositories that were behind their origin is printed to
+stdout. Only repositories with "smartystreets" in their
+path are included in this report.
 
 Repositories are identified for consideration from path values
 supplied as non-flag command line arguments or via the roots
