@@ -66,18 +66,15 @@ func (this *GitReviewer) GitAnalyzeAll() {
 
 		if this.config.GitFetch && len(report.FetchOutput) > 0 {
 			this.fetched[report.RepoPath] += report.FetchOutput + report.RevListOutput
-			this.journal[report.RepoPath] += report.FetchOutput + report.RevListOutput
+
+			if strings.Contains(report.RemoteOutput, "smartystreets") { // Exclude externals from code review journal.
+				this.journal[report.RepoPath] += report.FetchOutput + report.RevListOutput
+			}
 		}
 	}
 }
 
 func (this *GitReviewer) ReviewAll() {
-	for path := range this.journal {
-		if !strings.Contains(strings.ToLower(path), "smartystreets") {
-			delete(this.journal, path) // Don't include external code in review log.
-		}
-	}
-
 	reviewable := sortUniqueKeys(this.erred, this.messy, this.ahead, this.behind, this.fetched, this.journal)
 	if len(reviewable) == 0 {
 		log.Println("Nothing to review at this time.")
