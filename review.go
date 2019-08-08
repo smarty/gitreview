@@ -96,7 +96,7 @@ func (this *GitReviewer) ReviewAll() {
 		if err != nil {
 			log.Println("Failed to open git GUI:", err)
 		}
-		time.Sleep(time.Millisecond*250)
+		time.Sleep(time.Millisecond * 250)
 	}
 }
 
