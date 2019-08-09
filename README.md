@@ -32,7 +32,7 @@ flag (see details below).
 
 Installation:
 
-    go get -u github.com/mdwhatcott/gitreview
+    go get -u github.com/smartystreets/gitreview
 
 CLI Flags:
 
