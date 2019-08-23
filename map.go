@@ -23,6 +23,7 @@ func mapKeys(m map[string]string) (keys []string) {
 	for key := range m {
 		keys = append(keys, key)
 	}
+	sort.Strings(keys)
 	return keys
 }
 func printMapKeys(m map[string]string, preamble string) {
