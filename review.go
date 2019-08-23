@@ -86,6 +86,7 @@ func (this *GitReviewer) ReviewAll() {
 	printMapKeys(this.ahead, "Repositories ahead of origin master: %d")
 	printMapKeys(this.behind, "Repositories behind origin master: %d")
 	printMapKeys(this.fetched, "Repositories with new content since the last review: %d")
+	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
 	printStrings(reviewable, "Repositories to be reviewed: %d")
 
 	prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows)...", len(reviewable)))
@@ -101,8 +102,6 @@ func (this *GitReviewer) ReviewAll() {
 }
 
 func (this *GitReviewer) PrintCodeReviewLogEntry() {
-	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
-
 	if len(this.journal) == 0 {
 		return
 	}
