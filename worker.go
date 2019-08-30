@@ -25,10 +25,12 @@ func (this *Worker) Start() {
 func (this *Worker) git(path string) *GitReport {
 	path, _ = filepath.Abs(path)
 	report := &GitReport{RepoPath: path}
-	report.GitRemote()
-	report.GitStatus()
-	report.GitFetch()
-	report.GitRevList()
+	if !report.GitSkipStatus() {
+		report.GitRemote()
+		report.GitStatus()
+		report.GitFetch()
+		report.GitRevList()
+	}
 	log.Println(report.Progress())
 	return report
 }

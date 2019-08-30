@@ -12,6 +12,7 @@ var (
 	gitFetchPendingReview = ".."                                               // ie. [7761a97..1bbecb6  master     -> origin/master]
 	gitRevListCommand     = "git rev-list --left-right master...origin/master" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
 	gitErrorTemplate      = "[ERROR] Could not execute [%s]: %v" + "\n"
+	gitSkipCommand        = "git config --get review.skip"
 )
 
 type GitReport struct {
@@ -21,11 +22,13 @@ type GitReport struct {
 	StatusError  string
 	FetchError   string
 	RevListError string
+	SkipError    string
 
 	RemoteOutput  string
 	StatusOutput  string
 	FetchOutput   string
 	RevListOutput string
+	SkipOutput    string
 
 	RevListAhead  string
 	RevListBehind string
@@ -54,6 +57,17 @@ func (this *GitReport) GitStatus() {
 	if output := string(out); len(strings.TrimSpace(output)) > 0 {
 		this.StatusOutput = output
 	}
+}
+func (this *GitReport) GitSkipStatus() bool {
+	out, err := execute(this.RepoPath, gitSkipCommand)
+	if err != nil && err.Error() != "exit status 1" {
+		this.SkipError = fmt.Sprintf(gitErrorTemplate, gitSkipCommand, err)
+	}
+	if strings.Contains(out, "true") {
+		this.SkipOutput = out
+		return true
+	}
+	return false
 }
 func (this *GitReport) GitFetch() {
 	out, err := execute(this.RepoPath, gitFetchCommand)
@@ -113,5 +127,10 @@ func (this *GitReport) Progress() string {
 	} else {
 		status += " "
 	}
-	return fmt.Sprintf("[%-5s] %s", status, this.RepoPath)
+	if len(this.SkipOutput) > 0 {
+		status += "S"
+	} else {
+		status += " "
+	}
+	return fmt.Sprintf("[%-6s] %s", status, this.RepoPath)
 }
