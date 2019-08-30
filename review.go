@@ -18,6 +18,7 @@ type GitReviewer struct {
 	behind  map[string]string
 	fetched map[string]string
 	journal map[string]string
+	skipped map[string]string
 }
 
 func NewGitReviewer(config *Config) *GitReviewer {
@@ -33,12 +34,13 @@ func NewGitReviewer(config *Config) *GitReviewer {
 		behind:  make(map[string]string),
 		fetched: make(map[string]string),
 		journal: make(map[string]string),
+		skipped: make(map[string]string),
 	}
 }
 
 func (this *GitReviewer) GitAnalyzeAll() {
 	log.Printf("Analyzing %d git repositories...", len(this.repoPaths))
-	log.Println("Legend: [!] = error; [M] = messy; [A] = ahead; [B] = behind; [F] = fetched;")
+	log.Println("Legend: [!] = error; [M] = messy; [A] = ahead; [B] = behind; [F] = fetched; [S] = skipped;")
 	reports := NewAnalyzer(workerCount).AnalyzeAll(this.repoPaths)
 	for _, report := range reports {
 		if len(report.StatusError) > 0 {
@@ -62,6 +64,9 @@ func (this *GitReviewer) GitAnalyzeAll() {
 		}
 		if len(report.RevListBehind) > 0 {
 			this.behind[report.RepoPath] += report.RevListBehind
+		}
+		if len(report.SkipOutput) > 0 {
+			this.skipped[report.RepoPath] += report.SkipOutput
 		}
 
 		if this.config.GitFetch && len(report.FetchOutput) > 0 {
@@ -87,6 +92,7 @@ func (this *GitReviewer) ReviewAll() {
 	printMapKeys(this.behind, "Repositories behind origin master: %d")
 	printMapKeys(this.fetched, "Repositories with new content since the last review: %d")
 	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
+	printMapKeys(this.skipped, "Repositories that were skipped: %d")
 	printStrings(reviewable, "Repositories to be reviewed: %d")
 
 	prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows)...", len(reviewable)))
