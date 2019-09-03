@@ -112,10 +112,10 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 		return
 	}
 
+	prompt("Press <ENTER> to conclude review process and print code review log entry...")
+
 	writer := this.config.OpenOutputWriter()
 	defer func() { _ = writer.Close() }()
-
-	prompt("Press <ENTER> to conclude review process and print code review log entry...")
 
 	fmt.Fprintln(writer)
 	fmt.Fprintln(writer)

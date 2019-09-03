@@ -98,7 +98,7 @@ func (this *Config) OpenOutputWriter() io.WriteCloser {
 		}
 	}
 
-	log.Println("Final report will appear in stdout.")
+	log.Println("Final report will be written to stdout.")
 	return os.Stdout
 }
 
