@@ -77,6 +77,7 @@ func ReadConfig() *Config {
 func (this *Config) OpenOutputWriter() io.WriteCloser {
 	this.OutputFilePath = strings.TrimSpace(this.OutputFilePath)
 	if this.OutputFilePath == "" {
+		log.Println("Final report will be written to stdout.")
 		return os.Stdout
 	}
 
