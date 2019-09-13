@@ -26,6 +26,7 @@ func (this *Worker) git(path string) *GitReport {
 	path, _ = filepath.Abs(path)
 	report := &GitReport{RepoPath: path}
 	if !report.GitSkipStatus() {
+		report.GitOmitStatus()
 		report.GitRemote()
 		report.GitStatus()
 		report.GitFetch()

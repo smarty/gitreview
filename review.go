@@ -18,6 +18,7 @@ type GitReviewer struct {
 	behind  map[string]string
 	fetched map[string]string
 	journal map[string]string
+	omitted map[string]string
 	skipped map[string]string
 }
 
@@ -34,13 +35,14 @@ func NewGitReviewer(config *Config) *GitReviewer {
 		behind:  make(map[string]string),
 		fetched: make(map[string]string),
 		journal: make(map[string]string),
+		omitted: make(map[string]string),
 		skipped: make(map[string]string),
 	}
 }
 
 func (this *GitReviewer) GitAnalyzeAll() {
 	log.Printf("Analyzing %d git repositories...", len(this.repoPaths))
-	log.Println("Legend: [!] = error; [M] = messy; [A] = ahead; [B] = behind; [F] = fetched; [S] = skipped;")
+	log.Println("Legend: [!] = error; [M] = messy; [A] = ahead; [B] = behind; [F] = fetched; [O] = omitted; [S] = skipped;")
 	reports := NewAnalyzer(workerCount).AnalyzeAll(this.repoPaths)
 	for _, report := range reports {
 		if len(report.StatusError) > 0 {
@@ -68,15 +70,27 @@ func (this *GitReviewer) GitAnalyzeAll() {
 		if len(report.SkipOutput) > 0 {
 			this.skipped[report.RepoPath] += report.SkipOutput
 		}
+		if len(report.OmitOutput) > 0 {
+			this.omitted[report.RepoPath] += report.OmitOutput
+		}
 
 		if this.config.GitFetch && len(report.FetchOutput) > 0 {
 			this.fetched[report.RepoPath] += report.FetchOutput + report.RevListOutput
 
-			if strings.Contains(report.RemoteOutput, "smartystreets") { // Exclude externals from code review journal.
+			if this.canJournal(report) {
 				this.journal[report.RepoPath] += report.FetchOutput + report.RevListOutput
 			}
 		}
 	}
+}
+func (this *GitReviewer) canJournal(report *GitReport) bool {
+	if !strings.Contains(report.RemoteOutput, "smartystreets") { // Exclude externals from code review journal.
+		return false
+	}
+	if _, found := this.omitted[report.RepoPath]; found {
+		return false
+	}
+	return true
 }
 
 func (this *GitReviewer) ReviewAll() {

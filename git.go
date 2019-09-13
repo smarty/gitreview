@@ -12,6 +12,7 @@ var (
 	gitFetchPendingReview = ".."                                               // ie. [7761a97..1bbecb6  master     -> origin/master]
 	gitRevListCommand     = "git rev-list --left-right master...origin/master" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
 	gitErrorTemplate      = "[ERROR] Could not execute [%s]: %v" + "\n"
+	gitOmitCommand        = "git config --get review.omit"
 	gitSkipCommand        = "git config --get review.skip"
 )
 
@@ -28,6 +29,7 @@ type GitReport struct {
 	StatusOutput  string
 	FetchOutput   string
 	RevListOutput string
+	OmitOutput    string
 	SkipOutput    string
 
 	RevListAhead  string
@@ -65,6 +67,17 @@ func (this *GitReport) GitSkipStatus() bool {
 	}
 	if strings.Contains(out, "true") {
 		this.SkipOutput = out
+		return true
+	}
+	return false
+}
+func (this *GitReport) GitOmitStatus() bool {
+	out, err := execute(this.RepoPath, gitOmitCommand)
+	if err != nil && err.Error() != "exit status 1" {
+		this.SkipError = fmt.Sprintf(gitErrorTemplate, gitOmitCommand, err)
+	}
+	if strings.Contains(out, "true") {
+		this.OmitOutput = out
 		return true
 	}
 	return false
@@ -127,10 +140,15 @@ func (this *GitReport) Progress() string {
 	} else {
 		status += " "
 	}
+	if len(this.OmitOutput) > 0 {
+		status += "O"
+	} else {
+		status += " "
+	}
 	if len(this.SkipOutput) > 0 {
 		status += "S"
 	} else {
 		status += " "
 	}
-	return fmt.Sprintf("[%-6s] %s", status, this.RepoPath)
+	return fmt.Sprintf("[%-7s] %s", status, this.RepoPath)
 }
