@@ -153,7 +153,7 @@ Omitting Repositories:
 
 If you have repositories in your list that you would still like to audit
 but aren't responsible to sign off (it's code from another team), you can 
-mark them to be ommitted from teh final report by adding a config variable
+mark them to be omitted from the final report by adding a config variable
 to the repository. The following command will produce this result:
 
     git config --add review.omit true
