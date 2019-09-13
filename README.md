@@ -34,6 +34,16 @@ Installation:
 
     go get -u github.com/smartystreets/gitreview
 
+
+Skipping Repositories:
+
+If you have repositories in your list that you would rather not review,
+you can mark them to be skipped by adding a config variable to the
+repository. The following command will produce this result:
+
+    git config --add review.skip true
+
+
 CLI Flags:
 
 
@@ -58,12 +68,3 @@ CLI Flags:
     	line arguments representing paths to git repositories are provided.
     	--> (default "CDPATH")
 ```
-
-
-Skipping Repositories:
-
-If you have repositories in your list that you would rather not review,
-you can mark them to be skipped by adding a config variable to the
-repository. The following command will produce this result:
-
-    git config --add review.skip true
