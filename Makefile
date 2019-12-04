@@ -7,6 +7,6 @@ install:
 	go install
 
 package:
-	go build -o gitreview
+	go build -trimpath -o gitreview
 	zip gitreview.zip gitreview README.md LICENSE.md
 	rm gitreview
