@@ -117,10 +117,11 @@ repositories that meet any of the following criteria:
 We use variants of the following commands to ascertain the
 status of each repository:
 
-- 'git remote'    (shows remote address)
-- 'git status'    (shows uncommitted files)
-- 'git fetch'     (finds new commits/tags/branches)
-- 'git rev-list'  (lists commits behind/ahead of master)
+- 'git remote'           (shows remote address)
+- 'git status'           (shows uncommitted files)
+- 'git fetch'            (finds new commits/tags/branches)
+- 'git rev-list'         (lists commits behind/ahead of master)
+- 'git config --get ...' (show config parameters of a repo)
 
 ...all of which should be safe enough. 
 
