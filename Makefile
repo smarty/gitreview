@@ -18,3 +18,6 @@ package:
 	zip gitreview.zip gitreview README.md LICENSE.md
 	# TODO: use 'hub' to upload artifacts w/ release
 	rm gitreview
+
+
+.PHONE: test fmt docs install package
