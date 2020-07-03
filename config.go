@@ -159,6 +159,16 @@ to the repository. The following command will produce this result:
     git config --add review.omit true
 
 
+Specifying the 'default' branch:
+
+This tool assumes that the default branch of all repositories is 'master'.
+If a repository uses a non-standard default branch (ie. 'main', 'trunk')
+and you want this tool to focus  reviews on commits pushed to that branch
+instead, run the following command:
+
+	git config --add review.branch <branch-name>
+
+
 CLI Flags:
 `
 
