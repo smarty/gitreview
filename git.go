@@ -6,15 +6,21 @@ import (
 )
 
 var (
-	gitRemoteCommand      = "git remote -v"                                    // ie. [origin	git@github.com:mdwhatcott/gitreview.git (fetch)]
-	gitStatusCommand      = "git status --porcelain -uall"                     // parse-able output, including untracked
-	gitFetchCommand       = "git fetch"                                        // --dry-run"  // for debugging
-	gitFetchPendingReview = ".."                                               // ie. [7761a97..1bbecb6  master     -> origin/master]
-	gitRevListCommand     = "git rev-list --left-right master...origin/master" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
-	gitErrorTemplate      = "[ERROR] Could not execute [%s]: %v" + "\n"
-	gitOmitCommand        = "git config --get review.omit"
-	gitSkipCommand        = "git config --get review.skip"
+	gitRemoteCommand         = "git remote -v"                            // ie. [origin	git@github.com:mdwhatcott/gitreview.git (fetch)]
+	gitStatusCommand         = "git status --porcelain -uall"             // parse-able output, including untracked
+	gitFetchCommand          = "git fetch"                                // --dry-run"  // for debugging
+	gitFetchPendingReview    = ".."                                       // ie. [7761a97..1bbecb6  master     -> origin/master]
+	gitRevListCommand        = "git rev-list --left-right %s...origin/%s" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
+	gitErrorTemplate         = "[ERROR] Could not execute [%s]: %v" + "\n"
+	gitOmitCommand           = "git config --get review.omit"
+	gitSkipCommand           = "git config --get review.skip"
+	gitDefaultBranchCommand  = "git config --get review.branch"
+	gitStandardDefaultBranch = "master"
 )
+
+func GitRevListCommand(branch string) string {
+	return fmt.Sprintf(gitRevListCommand, branch, branch)
+}
 
 type GitReport struct {
 	RepoPath string
@@ -23,7 +29,6 @@ type GitReport struct {
 	StatusError  string
 	FetchError   string
 	RevListError string
-	SkipError    string
 
 	RemoteOutput  string
 	StatusOutput  string
@@ -43,7 +48,7 @@ func (this *GitReport) GitRemote() {
 		this.RemoteOutput = this.RepoPath
 		return
 	}
-	fields := strings.Fields(string(out))
+	fields := strings.Fields(out)
 	if len(fields) < 2 {
 		return
 	}
@@ -56,45 +61,43 @@ func (this *GitReport) GitStatus() {
 		this.StatusError = fmt.Sprintf(gitErrorTemplate, gitStatusCommand, err)
 		return
 	}
-	if output := string(out); len(strings.TrimSpace(output)) > 0 {
-		this.StatusOutput = output
+	if len(strings.TrimSpace(out)) > 0 {
+		this.StatusOutput = out
 	}
 }
 func (this *GitReport) GitSkipStatus() bool {
-	out, err := execute(this.RepoPath, gitSkipCommand)
-	if err != nil && err.Error() != "exit status 1" {
-		this.SkipError = fmt.Sprintf(gitErrorTemplate, gitSkipCommand, err)
-	}
-	if strings.Contains(out, "true") {
-		this.SkipOutput = out
-		return true
-	}
-	return false
+	out, _ := execute(this.RepoPath, gitSkipCommand)
+	this.SkipOutput = out
+	return strings.Contains(out, "true")
 }
 func (this *GitReport) GitOmitStatus() bool {
-	out, err := execute(this.RepoPath, gitOmitCommand)
-	if err != nil && err.Error() != "exit status 1" {
-		this.SkipError = fmt.Sprintf(gitErrorTemplate, gitOmitCommand, err)
+	out, _ := execute(this.RepoPath, gitOmitCommand)
+	this.OmitOutput = out
+	return strings.Contains(out, "true")
+}
+func (this *GitReport) GitDefaultBranch() string {
+	out, _ := execute(this.RepoPath, gitDefaultBranchCommand)
+	branch := strings.TrimSpace(out)
+	if branch == "" {
+		return gitStandardDefaultBranch
 	}
-	if strings.Contains(out, "true") {
-		this.OmitOutput = out
-		return true
-	}
-	return false
+	return branch
 }
 func (this *GitReport) GitFetch() {
 	out, err := execute(this.RepoPath, gitFetchCommand)
 	if err != nil {
 		this.FetchError = fmt.Sprintf(gitErrorTemplate, gitFetchCommand, err)
 	}
-	if output := string(out); strings.Contains(output, gitFetchPendingReview) {
-		this.FetchOutput = output
+	if strings.Contains(out, gitFetchPendingReview) {
+		this.FetchOutput = out
 	}
 }
 func (this *GitReport) GitRevList() {
-	out, err := execute(this.RepoPath, gitRevListCommand)
+	branch := this.GitDefaultBranch()
+	command := GitRevListCommand(branch)
+	out, err := execute(this.RepoPath, command)
 	if err != nil {
-		this.RevListError = fmt.Sprintf(gitErrorTemplate, gitRevListCommand, err)
+		this.RevListError = fmt.Sprintf(gitErrorTemplate, command, err)
 	}
 	behind, ahead := 0, 0
 	for _, line := range strings.Split(out, "\n") {
@@ -106,10 +109,10 @@ func (this *GitReport) GitRevList() {
 		}
 	}
 	if ahead > 0 {
-		this.RevListAhead = fmt.Sprintf("The default branch is %d commits ahead of origin.\n", ahead)
+		this.RevListAhead = fmt.Sprintf("The %s branch is %d commits ahead of origin/%s.\n", branch, ahead, branch)
 	}
 	if behind > 0 {
-		this.RevListBehind = fmt.Sprintf("The default branch is %d commits behind origin.\n", behind)
+		this.RevListBehind = fmt.Sprintf("The %s branch is %d commits behind origin/%s.\n", branch, behind, branch)
 	}
 }
 
