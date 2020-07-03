@@ -106,10 +106,10 @@ func (this *GitReport) GitRevList() {
 		}
 	}
 	if ahead > 0 {
-		this.RevListAhead = fmt.Sprintf("The master branch is %d commits ahead of origin/master.\n", ahead)
+		this.RevListAhead = fmt.Sprintf("The default branch is %d commits ahead of origin.\n", ahead)
 	}
 	if behind > 0 {
-		this.RevListBehind = fmt.Sprintf("The master branch is %d commits behind origin/master.\n", behind)
+		this.RevListBehind = fmt.Sprintf("The default branch is %d commits behind origin.\n", behind)
 	}
 }
 

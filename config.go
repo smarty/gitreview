@@ -109,8 +109,8 @@ gitreview facilitates visual inspection (code review) of git
 repositories that meet any of the following criteria:
 
 1. New content was fetched
-2. Behind origin/master
-3. Ahead of origin/master
+2. Behind origin/<default-branch>
+3. Ahead of origin/<default-branch>
 4. Messy (have uncommitted state)
 5. Throw errors for the required git operations (listed below)
 
@@ -120,7 +120,7 @@ status of each repository:
 - 'git remote'           (shows remote address)
 - 'git status'           (shows uncommitted files)
 - 'git fetch'            (finds new commits/tags/branches)
-- 'git rev-list'         (lists commits behind/ahead of master)
+- 'git rev-list'         (lists commits behind/ahead-of <default-branch>)
 - 'git config --get ...' (show config parameters of a repo)
 
 ...all of which should be safe enough. 
