@@ -20,4 +20,4 @@ package:
 	rm gitreview
 
 
-.PHONE: test fmt docs install package
+.PHONY: test fmt docs install package
