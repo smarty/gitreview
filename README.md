@@ -4,18 +4,19 @@ gitreview facilitates visual inspection (code review) of git
 repositories that meet any of the following criteria:
 
 1. New content was fetched
-2. Behind origin/master
-3. Ahead of origin/master
+2. Behind origin/<default-branch>
+3. Ahead of origin/<default-branch>
 4. Messy (have uncommitted state)
 5. Throw errors for the required git operations (listed below)
 
 We use variants of the following commands to ascertain the
 status of each repository:
 
-- `git remote`    (shows remote address)
-- `git status`    (shows uncommitted files)
-- `git fetch`     (finds new commits/tags/branches)
-- `git rev-list`  (lists commits behind/ahead of master)
+- `git remote`           (shows remote address)
+- `git status`           (shows uncommitted files)
+- `git fetch`            (finds new commits/tags/branches)
+- `git rev-list`         (lists commits behind/ahead-of <default-branch>)
+- `git config --get ...` (show config parameters of a repo)
 
 ...all of which should be safe enough. 
 
@@ -52,6 +53,16 @@ mark them to be omitted from the final report by adding a config variable
 to the repository. The following command will produce this result:
 
     git config --add review.omit true
+
+
+Specifying the `default` branch:
+
+This tool assumes that the default branch of all repositories is `master`.
+If a repository uses a non-standard default branch (ie. `main`, `trunk`)
+and you want this tool to focus  reviews on commits pushed to that branch
+instead, run the following command:
+
+	git config --add review.branch <branch-name>
 
 
 CLI Flags:

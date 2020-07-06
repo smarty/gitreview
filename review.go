@@ -102,8 +102,8 @@ func (this *GitReviewer) ReviewAll() {
 
 	printMapKeys(this.erred, "Repositories with git errors: %d")
 	printMapKeys(this.messy, "Repositories with uncommitted changes: %d")
-	printMapKeys(this.ahead, "Repositories ahead of origin master: %d")
-	printMapKeys(this.behind, "Repositories behind origin master: %d")
+	printMapKeys(this.ahead, "Repositories ahead of their origin: %d")
+	printMapKeys(this.behind, "Repositories behind their origin: %d")
 	printMapKeys(this.fetched, "Repositories with new content since the last review: %d")
 	printMapKeys(this.journal, "Repositories to be included in the final report: %d")
 	printMapKeys(this.skipped, "Repositories that were skipped: %d")
