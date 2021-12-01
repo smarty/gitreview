@@ -1,3 +1,3 @@
 module github.com/mdwhatcott/gitreview
 
-go 1.13
+go 1.17
