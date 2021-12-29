@@ -72,7 +72,7 @@ func ReadConfig() *Config {
 	)
 
 	repoList := flag.String(
-		"repo-list", "", ""+
+		"repos", "", ""+
 			"A colon-separated list of file paths, where each file contains a\n"+
 			"list of repositories to examine, with one repository on a line.\n"+
 			"-->",
@@ -151,7 +151,7 @@ func (this *Config) OpenOutputWriter() io.WriteCloser {
 func (this *Config) handleRepoFile(path string, prefixes []string) {
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatalf("Path for repo-list cannot be opened: %s: %s", path, err)
+		log.Fatalf("Path for repos cannot be opened: %s: %s", path, err)
 	}
 	defer file.Close()
 
@@ -167,7 +167,7 @@ func (this *Config) handleRepoFile(path string, prefixes []string) {
 	}
 
 	if err = scanner.Err(); err != nil {
-		log.Printf("Error reading repo-list: %s: %s", path, err)
+		log.Printf("Error reading repos: %s: %s", path, err)
 	}
 
 	log.Printf("Added %d repositories from file: %s", i, path)
