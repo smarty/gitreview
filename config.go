@@ -31,13 +31,12 @@ func ReadConfig() *Config {
 
 	config := new(Config)
 
-	//noinspection GoUnhandledErrorResult
 	flag.Usage = func() {
-		fmt.Fprintln(os.Stderr, doc)
-		fmt.Fprintln(os.Stderr)
-		fmt.Fprintln(os.Stderr, "```")
+		_, _ = fmt.Fprintln(os.Stderr, doc)
+		_, _ = fmt.Fprintln(os.Stderr)
+		_, _ = fmt.Fprintln(os.Stderr, "```")
 		flag.PrintDefaults()
-		fmt.Fprintln(os.Stderr, "```")
+		_, _ = fmt.Fprintln(os.Stderr, "```")
 	}
 
 	flag.StringVar(&config.GitGUILauncher,
@@ -135,12 +134,12 @@ func (this *Config) OpenOutputWriter() io.WriteCloser {
 
 	stat, err := os.Stat(path)
 	if err == nil && err != os.ErrNotExist {
-		file, err := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, stat.Mode())
-		if err == nil {
+		file, err2 := os.OpenFile(path, os.O_WRONLY|os.O_APPEND, stat.Mode())
+		if err2 == nil {
 			log.Println("Final report will be appended to", path)
 			return file
 		} else {
-			log.Printf("Could not open file for appending: [%s] Error: %v", this.OutputFilePath, err)
+			log.Printf("Could not open file for appending: [%s] Error: %v", this.OutputFilePath, err2)
 		}
 	}
 
@@ -153,7 +152,6 @@ func (this *Config) handleRepoFile(path string, prefixes []string) {
 	if err != nil {
 		log.Fatalf("Path for repos cannot be opened: %s: %s", path, err)
 	}
-	defer file.Close()
 
 	i := 0
 	scanner := bufio.NewScanner(file)
@@ -166,6 +164,7 @@ func (this *Config) handleRepoFile(path string, prefixes []string) {
 		}
 	}
 
+	_ = file.Close()
 	if err = scanner.Err(); err != nil {
 		log.Printf("Error reading repos: %s: %s", path, err)
 	}

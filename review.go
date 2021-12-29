@@ -139,9 +139,9 @@ func (this *GitReviewer) ReviewAll() {
 		var err error
 		if this.config.GitGUILauncher == "gitk" {
 			tmp, _ := os.Getwd()
-			os.Chdir(path)
+			_ = os.Chdir(path)
 			err = exec.Command(this.config.GitGUILauncher, "--all").Run()
-			os.Chdir(tmp)
+			_ = os.Chdir(tmp)
 		} else {
 			err = exec.Command(this.config.GitGUILauncher, path).Run()
 		}
@@ -152,7 +152,6 @@ func (this *GitReviewer) ReviewAll() {
 	}
 }
 
-//noinspection GoUnhandledErrorResult
 func (this *GitReviewer) PrintCodeReviewLogEntry() {
 	if len(this.journal) == 0 {
 		return
@@ -163,12 +162,12 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 	writer := this.config.OpenOutputWriter()
 	defer func() { _ = writer.Close() }()
 
-	fmt.Fprintln(writer)
-	fmt.Fprintln(writer)
-	fmt.Fprintln(writer, "##", time.Now().Format("2006-01-02"))
-	fmt.Fprintln(writer)
+	_, _ = fmt.Fprintln(writer)
+	_, _ = fmt.Fprintln(writer)
+	_, _ = fmt.Fprintln(writer, "##", time.Now().Format("2006-01-02"))
+	_, _ = fmt.Fprintln(writer)
 	for _, review := range this.journal {
-		fmt.Fprintln(writer, review)
+		_, _ = fmt.Fprintln(writer, review)
 	}
 }
 
