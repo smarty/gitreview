@@ -32,41 +32,39 @@ func ReadConfig() *Config {
 	config := new(Config)
 
 	flag.Usage = func() {
-		_, _ = fmt.Fprintln(os.Stderr, doc)
-		_, _ = fmt.Fprintln(os.Stderr)
-		_, _ = fmt.Fprintln(os.Stderr, "```")
+		_, _ = fmt.Fprintf(os.Stderr, "%s\n\n```\n", doc)
 		flag.PrintDefaults()
 		_, _ = fmt.Fprintln(os.Stderr, "```")
 	}
 
 	flag.StringVar(&config.GitGUILauncher,
 		"gui", "smerge", ""+
-			"The external git GUI application to use for visual reviews."+"\n"+
+			"The external git GUI application to use for visual reviews.\n"+
 			"-->",
 	)
 
 	flag.StringVar(&config.OutputFilePath,
 		"outfile", "SMARTY_REVIEW_LOG", ""+
-			"The path or name of the environment variable containing the"+"\n"+
-			"path to your pre-existing code review file. If the file exists"+"\n"+
-			"the final log entry will be appended to that file instead of stdout."+"\n"+
+			"The path or name of the environment variable containing the\n"+
+			"path to your pre-existing code review file. If the file exists\n"+
+			"the final log entry will be appended to that file instead of stdout.\n"+
 			"-->",
 	)
 
 	flag.BoolVar(&config.GitFetch,
 		"fetch", true, ""+
-			"When false, suppress all git fetch operations via --dry-run."+"\n"+
-			"Repositories with updates will still be included in the review."+"\n"+
+			"When false, suppress all git fetch operations via --dry-run.\n"+
+			"Repositories with updates will still be included in the review.\n"+
 			"-->",
 	)
 
 	gitRoots := flag.String(
 		"roots", "CDPATH", ""+
-			"The name of the environment variable containing colon-separated"+"\n"+
-			"path values to scan for any git repositories contained therein."+"\n"+
-			"Scanning is NOT recursive."+"\n"+
-			"NOTE: this flag will be ignored in the case that non-flag command"+"\n"+
-			"line arguments representing paths to git repositories are provided."+"\n"+
+			"The name of the environment variable containing colon-separated\n"+
+			"path values to scan for any git repositories contained therein.\n"+
+			"Scanning is NOT recursive.\n"+
+			"NOTE: this flag will be ignored in the case that non-flag command\n"+
+			"line arguments representing paths to git repositories are provided.\n"+
 			"-->",
 	)
 

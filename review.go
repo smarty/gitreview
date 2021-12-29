@@ -84,6 +84,7 @@ func (this *GitReviewer) GitAnalyzeAll() {
 		}
 	}
 }
+
 func (this *GitReviewer) canJournal(report *GitReport) bool {
 	if !strings.Contains(report.RemoteOutput, "smartystreets") { // Exclude externals from code review journal.
 		return false
@@ -130,7 +131,7 @@ func (this *GitReviewer) ReviewAll() {
 	printStrings(reviewable, "Repositories to be reviewed: %d")
 
 	in := prompt(fmt.Sprintf("Press <ENTER> to initiate the review process (will open %d review windows), or 'q' to quit...", len(reviewable)))
-	if len(in) > 0 && in[0] == 'q' {
+	if in == "q" {
 		os.Exit(0)
 	}
 
@@ -162,10 +163,7 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 	writer := this.config.OpenOutputWriter()
 	defer func() { _ = writer.Close() }()
 
-	_, _ = fmt.Fprintln(writer)
-	_, _ = fmt.Fprintln(writer)
-	_, _ = fmt.Fprintln(writer, "##", time.Now().Format("2006-01-02"))
-	_, _ = fmt.Fprintln(writer)
+	_, _ = fmt.Fprintf(writer, "\n\n##%s\n\n", time.Now().Format("2006-01-02"))
 	for _, review := range this.journal {
 		_, _ = fmt.Fprintln(writer, review)
 	}
