@@ -81,7 +81,7 @@ CLI Flags:
     	path to your pre-existing code review file. If the file exists
     	the final log entry will be appended to that file instead of stdout.
     	--> (default "SMARTY_REVIEW_LOG")
-  -repos string
+  -repo-list string
     	A colon-separated list of file paths, where each file contains a
     	list of repositories to examine, with one repository on a line.
     	-->
