@@ -65,16 +65,19 @@ func (this *GitReport) GitStatus() {
 		this.StatusOutput = out
 	}
 }
+
 func (this *GitReport) GitSkipStatus() bool {
 	out, _ := execute(this.RepoPath, gitSkipCommand)
 	this.SkipOutput = out
 	return strings.Contains(out, "true")
 }
+
 func (this *GitReport) GitOmitStatus() bool {
 	out, _ := execute(this.RepoPath, gitOmitCommand)
 	this.OmitOutput = out
 	return strings.Contains(out, "true")
 }
+
 func (this *GitReport) GitDefaultBranch() string {
 	out, _ := execute(this.RepoPath, gitDefaultBranchCommand)
 	branch := strings.TrimSpace(out)
@@ -83,6 +86,7 @@ func (this *GitReport) GitDefaultBranch() string {
 	}
 	return branch
 }
+
 func (this *GitReport) GitFetch() {
 	out, err := execute(this.RepoPath, gitFetchCommand)
 	if err != nil {
@@ -92,6 +96,7 @@ func (this *GitReport) GitFetch() {
 		this.FetchOutput = out
 	}
 }
+
 func (this *GitReport) GitRevList() {
 	branch := this.GitDefaultBranch()
 	command := GitRevListCommand(branch)

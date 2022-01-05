@@ -33,6 +33,7 @@ func collectGitRepositories(gitRoots []string) (gits []string) {
 
 	return gits
 }
+
 func filterGitRepositories(paths []string) (gits []string) {
 	for _, path := range paths {
 		stat, err := os.Stat(path)
@@ -46,6 +47,7 @@ func filterGitRepositories(paths []string) (gits []string) {
 	}
 	return gits
 }
+
 func isGitRepository(path string, item os.FileInfo) bool {
 	if !item.IsDir() {
 		return false

@@ -26,9 +26,11 @@ func mapKeys(m map[string]string) (keys []string) {
 	sort.Strings(keys)
 	return keys
 }
+
 func printMapKeys(m map[string]string, preamble string) {
 	printStrings(mapKeys(m), preamble)
 }
+
 func printStrings(paths []string, preamble string) {
 	log.Printf(preamble, len(paths))
 	if len(paths) == 0 {
