@@ -1,3 +1,3 @@
-module github.com/mdwhatcott/gitreview
+module github.com/smartystreets/gitreview
 
 go 1.17
