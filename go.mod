@@ -1,3 +1,3 @@
-module github.com/smartystreets/gitreview
+module root
 
 go 1.17
