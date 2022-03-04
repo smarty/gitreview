@@ -1,3 +1,3 @@
-module root
+module gitreview
 
 go 1.17
