@@ -9,7 +9,7 @@ var (
 	gitRemoteCommand         = "git remote -v"                            // ie. [origin	git@github.com:smartystreets/gitreview.git (fetch)]
 	gitStatusCommand         = "git status --porcelain -uall"             // parse-able output, including untracked
 	gitFetchCommand          = "git fetch"                                // --dry-run"  // for debugging
-	gitFetchPendingReview    = ".."                                       // ie. [7761a97..1bbecb6  master     -> origin/master]
+	gitFetchPendingReview    = "->"                                       // ie. [7761a97..1bbecb6  master     -> origin/master]
 	gitRevListCommand        = "git rev-list --left-right %s...origin/%s" // 1 line per commit w/ prefix '<' (ahead) or '>' (behind)
 	gitErrorTemplate         = "[ERROR] Could not execute [%s]: %v" + "\n"
 	gitOmitCommand           = "git config --get review.omit"
