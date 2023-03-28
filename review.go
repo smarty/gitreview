@@ -86,7 +86,7 @@ func (this *GitReviewer) GitAnalyzeAll() {
 }
 
 func (this *GitReviewer) canJournal(report *GitReport) bool {
-	if !strings.Contains(report.RemoteOutput, "smartystreets") { // Exclude externals from code review journal.
+	if !strings.Contains(report.RemoteOutput, "smarty") { // Exclude externals from code review journal.
 		return false
 	}
 	if _, found := this.omitted[report.RepoPath]; found {

@@ -26,7 +26,7 @@ Each repository that meets any criteria above will be
 presented for review. After all reviews are complete a
 concatenated report of all output from `git fetch` for
 repositories that were behind their origin is printed to
-stdout. Only repositories with "smartystreets" in their
+stdout. Only repositories with "smarty" in their
 path are included in this report.
 
 Repositories are identified for consideration from path values
@@ -35,7 +35,7 @@ flag (see details below).
 
 Installation:
 
-    go get -u github.com/smartystreets/gitreview
+    go get -u github.com/smarty/gitreview
 
 
 Skipping Repositories:
@@ -91,7 +91,7 @@ CLI Flags:
     	Letter code of repository statuses to review; where (a) is ahead,
     	origin/master (b) is behind origin/master, (e) has git errors,
     	(f) has new fetched contents, and (m) is messy with uncommitted
-    	changes. (j) is like (f) except only 'smartystreets' repositories
+    	changes. (j) is like (f) except only 'smarty' repositories
     	are considered
     	--> (default "abejm")
   -roots string
