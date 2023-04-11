@@ -190,6 +190,7 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 func excludeSSHFingerprints(report string) string {
 	var b strings.Builder
 	for _, line := range strings.Split(report, "\n") {
+		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "Host key fingerprint is ") {
 			continue
 		}
