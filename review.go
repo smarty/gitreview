@@ -165,8 +165,44 @@ func (this *GitReviewer) PrintCodeReviewLogEntry() {
 
 	_, _ = fmt.Fprintf(writer, "\n\n##%s\n\n", time.Now().Format("2006-01-02"))
 	for _, review := range this.journal {
-		_, _ = fmt.Fprintln(writer, review)
+		_, _ = fmt.Fprintln(writer, excludeSSHFingerprints(review))
 	}
+}
+
+// excludeSSHFingerprints removes SSH key fingerprints (and rendered 'randomart')
+// which appear when the VisualHostKey SSH configuration parameter is set.
+// http://users.ece.cmu.edu/~adrian/projects/validation/validation.pdf
+//
+// Example randomart:
+//
+// Host key fingerprint is SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU
+// +--[ED25519 256]--+
+// |                 |
+// |     .           |
+// |      o          |
+// |     o o o  .    |
+// |     .B S oo     |
+// |     =+^ =...    |
+// |    oo#o@.o.     |
+// |    E+.&.=o      |
+// |    ooo.X=.      |
+// +----[SHA256]-----+
+func excludeSSHFingerprints(report string) string {
+	var b strings.Builder
+	for _, line := range strings.Split(report, "\n") {
+		if strings.HasPrefix(line, "Host key fingerprint is ") {
+			continue
+		}
+		if strings.HasPrefix(line, "+") && strings.HasSuffix(line, "+") {
+			continue
+		}
+		if strings.HasPrefix(line, "|") && strings.HasSuffix(line, "|") {
+			continue
+		}
+		b.WriteString(line)
+		b.WriteString("\n")
+	}
+	return b.String()
 }
 
 const workerCount = 16
