@@ -35,7 +35,7 @@ flag (see details below).
 
 Installation:
 
-    go get -u github.com/smarty/gitreview
+    make install
 
 
 Skipping Repositories:
