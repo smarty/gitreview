@@ -15,7 +15,7 @@ install:
 	go install -ldflags="-X 'main.Version=$(VERSION)'"
 
 package:
-	go build -trimpath -o gitreview
+	go build -ldflags="-X 'main.Version=$(VERSION)'" -trimpath -o gitreview
 	zip gitreview.zip gitreview README.md LICENSE.md
 	# TODO: use 'hub' to upload artifacts w/ release
 	rm gitreview
