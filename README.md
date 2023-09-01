@@ -1,4 +1,13 @@
-#### SMARTY DISCLAIMER: Subject to the terms of the associated license agreement, this software is freely available for your use. This software is FREE, AS IN PUPPIES, and is a gift. Enjoy your new responsibility. This means that while we may consider enhancement requests, we may or may not choose to entertain requests at our sole and absolute discretion.
+Usage of analyzer @ dev:
+
+#### SMARTY DISCLAIMER:
+
+Subject to the terms of the associated license agreement, this
+software is freely available for your use. This software is
+FREE, AS IN PUPPIES, and is a gift. Enjoy your new
+responsibility. This means that while we may consider
+enhancement requests, we may or may not choose to entertain
+requests at our sole and absolute discretion.
 
 # gitreview
 
@@ -35,7 +44,7 @@ flag (see details below).
 
 Installation:
 
-    make install
+    go get -u github.com/smarty/gitreview
 
 
 Skipping Repositories:
@@ -69,7 +78,6 @@ instead, run the following command:
 
 CLI Flags:
 
-
 ```
   -fetch
     	When false, suppress all git fetch operations via --dry-run.
@@ -83,10 +91,6 @@ CLI Flags:
     	path to your pre-existing code review file. If the file exists
     	the final log entry will be appended to that file instead of stdout.
     	--> (default "SMARTY_REVIEW_LOG")
-  -roots-file string
-    	A colon-separated list of file paths, where each file contains a
-    	list of repositories to examine, with one repository on a line.
-    	-->
   -review string
     	Letter code of repository statuses to review; where (a) is ahead,
     	origin/master (b) is behind origin/master, (e) has git errors,
@@ -101,4 +105,8 @@ CLI Flags:
     	NOTE: this flag will be ignored in the case that non-flag command
     	line arguments representing paths to git repositories are provided.
     	--> (default "CDPATH")
+  -roots-file string
+    	A colon-separated list of file paths, where each file contains a
+    	list of repositories to examine, with one repository on a line.
+    	-->
 ```

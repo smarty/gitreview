@@ -26,24 +26,27 @@ type Config struct {
 	ReviewMessy        bool
 }
 
-func ReadConfig() *Config {
+func ReadConfig(version string) *Config {
 	log.SetFlags(log.Ltime | log.Lshortfile)
 
 	config := new(Config)
 
-	flag.Usage = func() {
-		_, _ = fmt.Fprintf(os.Stderr, "%s\n\n```\n", doc)
-		flag.PrintDefaults()
-		_, _ = fmt.Fprintln(os.Stderr, "```")
+	flags := flag.NewFlagSet(fmt.Sprintf("%s @ %s", filepath.Base(os.Args[0]), Version), flag.ExitOnError)
+
+	flags.Usage = func() {
+		_, _ = fmt.Fprintf(flags.Output(), "Usage of %s:\n\n", flags.Name())
+		_, _ = fmt.Fprintf(flags.Output(), "%s\n\n```\n", doc)
+		flags.PrintDefaults()
+		_, _ = fmt.Fprintln(flags.Output(), "```")
 	}
 
-	flag.StringVar(&config.GitGUILauncher,
+	flags.StringVar(&config.GitGUILauncher,
 		"gui", "smerge", ""+
 			"The external git GUI application to use for visual reviews.\n"+
 			"-->",
 	)
 
-	flag.StringVar(&config.OutputFilePath,
+	flags.StringVar(&config.OutputFilePath,
 		"outfile", "SMARTY_REVIEW_LOG", ""+
 			"The path or name of the environment variable containing the\n"+
 			"path to your pre-existing code review file. If the file exists\n"+
@@ -51,14 +54,14 @@ func ReadConfig() *Config {
 			"-->",
 	)
 
-	flag.BoolVar(&config.GitFetch,
+	flags.BoolVar(&config.GitFetch,
 		"fetch", true, ""+
 			"When false, suppress all git fetch operations via --dry-run.\n"+
 			"Repositories with updates will still be included in the review.\n"+
 			"-->",
 	)
 
-	gitRoots := flag.String(
+	gitRoots := flags.String(
 		"roots", "CDPATH", ""+
 			"The name of the environment variable containing colon-separated\n"+
 			"path values to scan for any git repositories contained therein.\n"+
@@ -68,14 +71,14 @@ func ReadConfig() *Config {
 			"-->",
 	)
 
-	repoList := flag.String(
+	repoList := flags.String(
 		"roots-file", "", ""+
 			"A colon-separated list of file paths, where each file contains a\n"+
 			"list of repositories to examine, with one repository on a line.\n"+
 			"-->",
 	)
 
-	review := flag.String(
+	review := flags.String(
 		"review", "abejm", ""+
 			"Letter code of repository statuses to review; where (a) is ahead,\n"+
 			"origin/master (b) is behind origin/master, (e) has git errors,\n"+
@@ -85,7 +88,7 @@ func ReadConfig() *Config {
 			"-->",
 	)
 
-	flag.Parse()
+	_ = flags.Parse(os.Args[1:])
 
 	config.ReviewAhead = strings.ContainsAny(*review, "aA")
 	config.ReviewBehind = strings.ContainsAny(*review, "bB")
@@ -195,7 +198,18 @@ func (this *Config) tryPaths(path string, prefixes []string) string {
 	return path
 }
 
-const rawDoc = `# gitreview
+const rawDoc = `
+
+#### SMARTY DISCLAIMER:
+
+Subject to the terms of the associated license agreement, this
+software is freely available for your use. This software is
+FREE, AS IN PUPPIES, and is a gift. Enjoy your new
+responsibility. This means that while we may consider
+enhancement requests, we may or may not choose to entertain
+requests at our sole and absolute discretion.
+
+# gitreview
 
 gitreview facilitates visual inspection (code review) of git
 repositories that meet any of the following criteria:
@@ -265,4 +279,4 @@ instead, run the following command:
 CLI Flags:
 `
 
-var doc = strings.ReplaceAll(rawDoc, "'", "`")
+var doc = strings.ReplaceAll(strings.TrimSpace(rawDoc), "'", "`")

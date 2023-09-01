@@ -1,5 +1,7 @@
 #!/usr/bin/make -f
 
+VERSION := $(shell git describe)
+
 test: fmt
 	GORACE="atexit_sleep_ms=50" go test ./...
 
@@ -10,7 +12,7 @@ docs:
 	-go run *.go -help 2>&1 >/dev/null | grep -v 'exit status 2' > README.md
 
 install:
-	go install
+	go install -ldflags="-X 'main.Version=$(VERSION)'"
 
 package:
 	go build -trimpath -o gitreview
