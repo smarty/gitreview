@@ -97,7 +97,7 @@ func ReadConfig(version string) *Config {
 	config.ReviewJournal = strings.ContainsAny(*review, "jJ")
 	config.ReviewMessy = strings.ContainsAny(*review, "mM")
 
-	config.GitRepositoryPaths = flag.Args()
+	config.GitRepositoryPaths = flags.Args()
 	roots := strings.Split(os.Getenv(*gitRoots), ":")
 
 	if len(*repoList) > 0 {
