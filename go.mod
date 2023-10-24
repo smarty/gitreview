@@ -1,3 +1,3 @@
 module github.com/smarty/gitreview
 
-go 1.17
+go 1.21
