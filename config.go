@@ -223,17 +223,17 @@ repositories that meet any of the following criteria:
 We use variants of the following commands to ascertain the
 status of each repository:
 
-- 'git remote'           (shows remote address)
-- 'git status'           (shows uncommitted files)
-- 'git fetch'            (finds new commits/tags/branches)
-- 'git rev-list'         (lists commits behind/ahead-of <default-branch>)
-- 'git config --get ...' (show config parameters of a repo)
+- ''git remote''           (shows remote address)
+- ''git status''           (shows uncommitted files)
+- ''git fetch''            (finds new commits/tags/branches)
+- ''git rev-list''         (lists commits behind/ahead-of <default-branch>)
+- ''git config --get ...'' (show config parameters of a repo)
 
 ...all of which should be safe enough. 
 
 Each repository that meets any criteria above will be
 presented for review. After all reviews are complete a
-concatenated report of all output from 'git fetch' for
+concatenated report of all output from ''git fetch'' for
 repositories that were behind their origin is printed to
 stdout. Only repositories with "smarty" in their
 path are included in this report.
@@ -266,10 +266,10 @@ to the repository. The following command will produce this result:
     git config --add review.omit true
 
 
-Specifying the 'default' branch:
+Specifying the ''default'' branch:
 
-This tool assumes that the default branch of all repositories is 'master'.
-If a repository uses a non-standard default branch (ie. 'main', 'trunk')
+This tool assumes that the default branch of all repositories is ''master''.
+If a repository uses a non-standard default branch (ie. ''main'', ''trunk'')
 and you want this tool to focus  reviews on commits pushed to that branch
 instead, run the following command:
 
@@ -279,4 +279,4 @@ instead, run the following command:
 CLI Flags:
 `
 
-var doc = strings.ReplaceAll(strings.TrimSpace(rawDoc), "'", "`")
+var doc = strings.ReplaceAll(strings.TrimSpace(rawDoc), "''", "`")
