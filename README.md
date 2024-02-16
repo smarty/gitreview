@@ -1,4 +1,4 @@
-Usage of analyzer @ dev:
+Usage of gitreview @ dev:
 
 #### SMARTY DISCLAIMER:
 

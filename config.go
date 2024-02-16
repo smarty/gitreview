@@ -31,7 +31,7 @@ func ReadConfig(version string) *Config {
 
 	config := new(Config)
 
-	flags := flag.NewFlagSet(fmt.Sprintf("%s @ %s", filepath.Base(os.Args[0]), Version), flag.ExitOnError)
+	flags := flag.NewFlagSet(fmt.Sprintf("gitreview @ %s", version), flag.ExitOnError)
 
 	flags.Usage = func() {
 		_, _ = fmt.Fprintf(flags.Output(), "Usage of %s:\n\n", flags.Name())
